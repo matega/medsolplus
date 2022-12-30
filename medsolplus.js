@@ -690,7 +690,7 @@ function openSettingsWindow() {
   `);
   var activateDiv = settingsWindow.document.getElementById("activateDiv");
   var settingsDiv = settingsWindow.document.getElementById("settingsDiv");
-  var userPrefs = GM_getValue("userPrefs");
+  var userPrefs = GM_getValue("userPrefs", {});
   if(!(currentUser in userPrefs)) {
     var initButton = settingsWindow.document.createElement("button");
     initButton.innerText = "Medsol Plus aktiválása";
