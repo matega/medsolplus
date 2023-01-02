@@ -7,7 +7,7 @@
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @grant       GM.xmlHttpRequest
-// @version     1.01
+// @version     1.02
 // @downloadURL https://raw.githubusercontent.com/matega/medsolplus/master/medsolplus.js
 // @author      Dr. Galambos Máté | galambos.mate@semmelweis.hu
 // @description e-MedSolution extra funkciók a sürgősségi osztályon (KSBA)
@@ -561,7 +561,7 @@ function checkUnfiltered() {
   if(document.querySelectorAll("div#filter_mini input").length != 4) return false;
   if(document.querySelector("div#filter_mini input[name=\"MINI.Q1_0_0\"]").value !="KSBA") return false;
   var d = new Date();
-  var datestring = d.getFullYear() + "." + (d.getMonth()+1) + "." + d.getDate();
+  var datestring = d.getFullYear() + "." + String(d.getMonth()+1).padStart(2, "0") + "." + String(d.getDate()).padStart(2, "0");
   if(document.querySelector("div#filter_mini input[name=\"MINI.Q1_0_1\"]").value !=datestring) return false;
   if(document.querySelector("div#filter_mini input[name=\"MINI.Q1_0_2\"]").value !="00:00") return false;
   if(document.querySelector("div#filter_mini input[name=\"MINI.Q1_0_3\"]").value !="23:59") return false;
