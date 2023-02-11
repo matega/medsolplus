@@ -7,7 +7,7 @@
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @grant       GM.xmlHttpRequest
-// @version     1.03
+// @version     1.04
 // @downloadURL https://raw.githubusercontent.com/matega/medsolplus/master/medsolplus.js
 // @author      Dr. Galambos Máté | galambos.mate@semmelweis.hu
 // @description e-MedSolution extra funkciók a sürgősségi osztályon (KSBA)
@@ -286,9 +286,9 @@ function autoTEK(label) {
       cim.classList.add("mategascript-address");
       var cimtext = cim.innerText;
       var cmatch = cimtext.match(cimre);
-      console.log(cimtext);
+      //console.log(cimtext);
       if(!cmatch) continue;
-      console.log(cmatch);
+      //console.log(cmatch);
       var varos = cmatch[1] == "1"?("Budapest " + romai[parseInt(cmatch[2])-1] + ". kerület"):(cmatch[3]);
       GM.xmlHttpRequest(
         {
@@ -350,13 +350,13 @@ function xtekcb(e) {
         console.log(e, tdtexts);
       }
     }
-    console.log(hosps);
+    //console.log(hosps);
     var filteredHosps = [];
     var specfilter = getUserPref("autoTEKSpecList");
     for(i=0; i<specfilter.length; i++) {
       filteredHosps.push(hosps[specfilter[i]]);
     }
-    console.log(filteredHosps);
+    //console.log(filteredHosps);
     var tekDropdown = document.createElement("table");
     tekDropdown.classList.add("mategascript-tekdropdown");
     var headRow = document.createElement("td");
@@ -365,16 +365,20 @@ function xtekcb(e) {
     headRow.innerText = e.context.varos;
     tekDropdown.appendChild(headRow);
     for(i=0; i<filteredHosps.length; i++) {
-      var hospRow = document.createElement("tr");
-      var hospCell = document.createElement("td");
-      hospCell.innerText = filteredHosps[i]["spec"];
-      hospRow.appendChild(hospCell);
-      hospCell = document.createElement("td");
-      hospCell.innerText = filteredHosps[i]["hosp"];
-      hospRow.appendChild(hospCell);
-      tekDropdown.appendChild(hospRow);
+      try {
+        var hospRow = document.createElement("tr");
+        var hospCell = document.createElement("td");
+        hospCell.innerText = filteredHosps[i]["spec"];
+        hospRow.appendChild(hospCell);
+        hospCell = document.createElement("td");
+        hospCell.innerText = filteredHosps[i]["hosp"];
+        hospRow.appendChild(hospCell);
+        tekDropdown.appendChild(hospRow);
+      } catch (e) {
+        console.log(e);
+      }
     }
-    console.log(tekDropdown);
+    //console.log(tekDropdown);
     e.context.cim.appendChild(tekDropdown);
     e.context.cim.classList.add("mategascript-position-relative");
     addGlobalStyle(`
@@ -663,7 +667,7 @@ function showSettingsButton() {
     settingsButton.setAttribute("onmousemove", "multilineTooltip.showTip(\"Medsol Plus beállítások\", event)");
     settingsButton.setAttribute("onmouseout", "multilineTooltip.hideTip(event)");
     holder.prepend(settingsButton);
-    console.log(settingsButton);
+    //console.log(settingsButton);
     addGlobalStyle(`
 td.buttonsright {
   width: 290px !important;
@@ -751,7 +755,7 @@ function patientAccounting() {
     var notes = document.querySelectorAll("#A1_4_body > tr> td:nth-child("+ (triagelabel+1) +")");
     for(var i =  0 ; i<notes.length; i++) {
       var kba = notes[i].parentNode.dataset.mategascriptKba;
-      console.log(kba);
+      //console.log(kba);
       var patient = {};
       if(!(kba in kbaPatientList)) {
         patient = {firstSeen: now, firstSeenState: currentPage, currentState: currentPage, stateChanges: [], lastSeen: now};
