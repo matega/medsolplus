@@ -7,7 +7,7 @@
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @grant       GM.xmlHttpRequest
-// @version     1.02
+// @version     1.03
 // @downloadURL https://raw.githubusercontent.com/matega/medsolplus/master/medsolplus.js
 // @author      Dr. Galambos Máté | galambos.mate@semmelweis.hu
 // @description e-MedSolution extra funkciók a sürgősségi osztályon (KSBA)
@@ -270,14 +270,14 @@ if(getUserPref("uFrameIdenticons")) uFrameIdenticons();
 
 if(getUserPref("windowHeaderIdenticons")) windowHeaderIdenticons();
 
-function autoTEK() {
+function autoTEK(label) {
   cimre = /^(\d)(\d{2})\d\W+?([\wöÖüÜóÓőŐúÚűŰéÉáÁíÍ]+)\W/;
   romai = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII', 'XIII', 'XIV', 'XV', 'XVI', 'XVII', 'XVIII', 'XIX', 'XX', 'XXI', 'XXII', 'XXIII'];
   extendNode = null;
   if("/sote/UpdateFrame.fl" != document.location.pathname) return;
   var nodes = document.querySelectorAll("#report_table>tbody>tr>td:first-child");
   for(var i=0; i<nodes.length; i++) {
-    if(["Lakcím", "Ideiglenes lakcím:"].includes(nodes[i].innerText)) {
+    if(label == nodes[i].innerText) {
       var parent = nodes[i].parentNode;
       var tdnum = 3;
       if(nodes[i].innerText == "Ideiglenes lakcím:") tdnum = 2;
@@ -296,6 +296,7 @@ function autoTEK() {
           "method": "GET",
           "context": {"stage": 0, "cim": cim, "varos": varos, "data": "id12_hf_0=&ac="+encodeURIComponent(varos)+"&tekszakmak%3Aszakmakform%3Atekszakmak=0&tekszakmak%3Aszakmakform%3Aord_szakma=on&elerhment.x=5&elerhment.y=5"},
           "onload": xtekcb,
+          "onerror": autoTEKSequential,
           "headers": {
             "Content-Type": "application/x-www-form-urlencoded",
             "Origin": "http://84.206.43.26:7080",
@@ -303,8 +304,10 @@ function autoTEK() {
           }
         }
       );
+      return;
     }
   }
+  autoTEKSequential();
 }
 
 function xtekcb(e) {
@@ -317,6 +320,7 @@ function xtekcb(e) {
           "data": e.context.data,
           "context": {"stage": 1, "cim": e.context.cim, "varos": e.context.varos},
           "onload": xtekcb,
+          "onerror": autoTEKSequential,
           "headers": {
             "Content-Type": "application/x-www-form-urlencoded",
             "Origin": "http://84.206.43.26:7080",
@@ -398,10 +402,18 @@ table.mategascript-tekdropdown td.mategascript-address-row {
   position: relative;
 }
     `);
+    autoTEKSequential();
   }
 }
 
-if(getUserPref("autoTEK")) autoTEK();
+autoTEKLabels = ["Lakcím", "Ideiglenes lakcím:"];
+autoTEKStage = 0;
+
+function autoTEKSequential() {
+  if(autoTEKStage < autoTEKLabels.length) autoTEK(autoTEKLabels[autoTEKStage++]);
+}
+
+if(getUserPref("autoTEK")) autoTEKSequential();
 
 function autoAge() {
   if("/sote/UpdateFrame.fl" != document.location.pathname) return;
