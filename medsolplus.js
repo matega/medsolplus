@@ -452,7 +452,7 @@ if(getUserPref("autoAge")) autoAge();
 
 function loadList() {
   if(["/sote/101315.do","/sote/101307.do"].includes(document.location.pathname)) {
-    var userre = new RegExp("^(?:COVID\\W+)?((?!COVID)[A-ZÁÉÍÓÖŐÚÜŰ\\.]{2,}|VaPe)(?:\\W|$)");
+    var userre = new RegExp("^(?:COVID\\W+)?((?!COVID)[A-ZÁÉÍÓÖŐÚÜŰ\\.\\-]{2,}|VaPe)(?:\\W|$)");
     var donere = /(?:>>|\W-{2,}>>?)/;
     var attnre = /!!/;
 
@@ -462,8 +462,6 @@ div.mategascript-altered {
 }
     `);
     var unfiltered = checkUnfiltered();
-    if(!unfiltered) document.getElementById("filter_mini").classList.add("mategascript-altered");
-
     triagelabel = -1;
     var headers = document.querySelectorAll("table.clabel th");
     for(var i = 0; i<headers.length; i++) {
@@ -573,15 +571,69 @@ table.mategascript_droptable th {
 
 }
 
-function checkUnfiltered() {
-  if(document.querySelectorAll("div#filter_mini input").length != 4) return false;
-  if(document.querySelector("div#filter_mini input[name=\"MINI.Q1_0_0\"]").value !="KSBA") return false;
+function getUnfilteredParameters() {
+  var unfilteredParams = {
+    "/sote/101315.do": [
+      ["Q1_0_0", "value", "KSBA"],
+      ["Q1_0_2", "value", "00:00"],
+      ["Q1_0_3", "value", "23:59"],
+      ["Q1_0_4", "value", ""],
+      ["Q1_0_7", "value", ""],
+      ["Q1_0_8", "checked", false],
+      ["Q1_0_10", "value", ""],
+      ["Q1_0_12", "value", ""],
+      ["Q1_0_13", "value", ""],
+      ["Q1_0_14", "value", ""]
+    ],
+    "/sote/101307.do": [
+      ["Q1_0_0", "value", "KSBA"],
+      ["Q1_0_2", "value", "00:00"],
+      ["Q1_0_3", "value", "23:59"],
+      ["Q1_0_4", "value", ""],
+      ["Q1_0_10", "value", ""],
+      ["Q1_0_7", "checked", false],
+      ["Q1_0_9", "value", ""],
+      ["Q1_0_11", "value", ""],
+      ["Q1_0_12", "value", ""],
+    ]
+  }
+  unfilteredParams = unfilteredParams[document.location.pathname];
   var d = new Date();
   var datestring = d.getFullYear() + "." + String(d.getMonth()+1).padStart(2, "0") + "." + String(d.getDate()).padStart(2, "0");
-  if(document.querySelector("div#filter_mini input[name=\"MINI.Q1_0_1\"]").value !=datestring) return false;
-  if(document.querySelector("div#filter_mini input[name=\"MINI.Q1_0_2\"]").value !="00:00") return false;
-  if(document.querySelector("div#filter_mini input[name=\"MINI.Q1_0_3\"]").value !="23:59") return false;
-  return true;
+  unfilteredParams.push(["Q1_0_1", "value", datestring]);
+  return unfilteredParams;
+}
+
+function checkUnfiltered() {
+  var unfilteredParams = getUnfilteredParameters();
+  for(var i = 0; i < unfilteredParams.length; i++) {
+    try {
+      var elem = document.getElementsByName(unfilteredParams[i][0])[0];
+      if(elem[unfilteredParams[i][1]] != unfilteredParams[i][2]) {
+        // console.log(elem, unfilteredParams[i]);
+        return false;
+      }
+    } catch (e) {
+      console.log(e, unfilteredParams[i]);
+    }
+  }
+  return true
+}
+
+
+function mategascript_reset_query() {
+  var unfilteredParams = getUnfilteredParameters();
+  for(var i = 0; i < unfilteredParams.length; i++) {
+    try {
+      var elem = document.getElementsByName(unfilteredParams[i][0])[0];
+      elem[unfilteredParams[i][1]] = unfilteredParams[i][2];
+    } catch (e) {
+      console.log(e, unfilteredParams[i]);
+    }
+  }
+  console.log("aaaa");
+  doRefresh();
+  console.log("bbbb");
 }
 
 function user_map(user) {
@@ -643,6 +695,7 @@ function hideKBA() {
     cols[kbaCol].setAttribute("width", "0");
     cols[mergeCol].setAttribute("width", parseInt(cols[mergeCol].getAttribute("width")) + 1 + "%*");
     var contentTable = document.querySelector("table#A1_4");
+    if(contentTable == null) return;
     var cols = contentTable.querySelectorAll("colgroup > col");
     cols[kbaCol].setAttribute("width", "0");
     cols[mergeCol].setAttribute("width", parseInt(cols[mergeCol].getAttribute("width")) + 1 + "%*");
@@ -807,6 +860,52 @@ function patientAccountingPrune() {
 if(getUserPref("patientAccounting")) {
   patientAccounting();
   patientAccountingPrune();
+}
+
+function resetButton() {
+  if(["/sote/101315.do","/sote/101307.do"].includes(document.location.pathname)) {
+    if(!checkUnfiltered()) {
+      submitbtns = document.querySelectorAll("#filterbutton");
+      for(var i = 0; i < submitbtns.length; i++) {
+        var resetbtndiv = document.createElement("div");
+        var resetbtna = document.createElement("a");
+        resetbtna.innerText = "Mindenki";
+        resetbtna.href = "javascript:void(0);";
+        resetbtndiv.setAttribute("class", "btn");
+        resetbtndiv.setAttribute("style", "float: right;");
+        resetbtna.setAttribute("class", "mategascript_reset_button");
+        resetbtna.addEventListener("click", mategascript_reset_query);
+        resetbtndiv.appendChild(resetbtna);
+        addGlobalStyle(`
+          div.btn a.mategascript_reset_button {
+            margin: 0px;
+            padding: 0px 15px;
+            border: none;
+            background-color: red;
+            color: #ffffff;
+            height: 27px;
+            line-height: 27px;
+            text-align: left;
+            text-decoration: none;
+            white-space: nowrap;
+            vertical-align: text-middle;
+            float: left;
+            border-radius: 2px;
+            -webkit-transition: all 0.3s ease 0s;
+            -moz-transition: all 0.3s ease 0s;
+            -o-transition: all 0.3s ease 0s;
+            transition: all 0.3s ease 0s;
+            cursor: pointer;
+          }
+        `);
+        submitbtns[i].before(resetbtndiv);
+      }
+    }
+  }
+}
+
+if(getUserPref("resetButton")) {
+  resetButton();
 }
 
 showSettingsButton();
