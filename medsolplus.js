@@ -7,7 +7,7 @@
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @grant       GM.xmlHttpRequest
-// @version     1.05
+// @version     1.06
 // @downloadURL https://raw.githubusercontent.com/matega/medsolplus/master/medsolplus.js
 // @author      Dr. Galambos Máté | galambos.mate@semmelweis.hu
 // @description e-MedSolution extra funkciók a sürgősségi osztályon (KSBA)
@@ -32,7 +32,7 @@ settingsSkeleton = {
   ],
   "loadList": true,
   "triageButtonTame": true,
-  "hideKBA": true,
+  "hideevn": true,
   "triageName": "",
   "patientAccounting": true
 }
@@ -456,11 +456,6 @@ function loadList() {
     var donere = /(?:>>|\W-{2,}>>?)/;
     var attnre = /!!/;
 
-    addGlobalStyle(`
-div.mategascript-altered {
-  background-color: pink;
-}
-    `);
     var unfiltered = checkUnfiltered();
     triagelabel = -1;
     var headers = document.querySelectorAll("table.clabel th");
@@ -678,36 +673,36 @@ function triageButtonTameCallback(e) {
 
 if(getUserPref("triageButtonTame")) triageButtonTame();
 
-function hideKBA() {
+function hideEvn() {
   if(["/sote/101315.do","/sote/101307.do"].includes(document.location.pathname)) {
     var headerTable = document.querySelector("div#A1_3 > table");
     var headerCells = headerTable.querySelectorAll("th");
-    var kbaCol = -1;
+    var evnCol = -1;
     for(var i=0; i<headerCells.length; i++) {
-      if(headerCells[i].innerText == "kba-hide") {
-        kbaCol = i;
+      if(headerCells[i].innerText == "evn-hide") {
+        evnCol = i;
         break;
       }
     }
-    if(kbaCol == -1) return;
-    var mergeCol = kbaCol == 0 ? kbaCol + 1 : kbaCol - 1;
+    if(evnCol == -1) return;
+    var mergeCol = evnCol == 0 ? evnCol + 1 : evnCol - 1;
     var cols = headerTable.querySelectorAll("colgroup > col");
-    cols[kbaCol].setAttribute("width", "0");
+    cols[evnCol].setAttribute("width", "0");
     cols[mergeCol].setAttribute("width", parseInt(cols[mergeCol].getAttribute("width")) + 1 + "%*");
     var contentTable = document.querySelector("table#A1_4");
     if(contentTable == null) return;
     var cols = contentTable.querySelectorAll("colgroup > col");
-    cols[kbaCol].setAttribute("width", "0");
+    cols[evnCol].setAttribute("width", "0");
     cols[mergeCol].setAttribute("width", parseInt(cols[mergeCol].getAttribute("width")) + 1 + "%*");
     var rows = document.querySelectorAll("table#A1_4 > tbody > tr");
     for(var i = 0; i < rows.length; i++) {
-      rows[i].dataset.mategascriptKba = rows[i].children[kbaCol].innerText;
+      rows[i].dataset.mategascriptEvn = rows[i].children[evnCol].innerText;
     }
   }
 }
 
 
-if(getUserPref("hideKBA")) hideKBA();
+if(getUserPref("hideEvn")) hideEvn();
 
 function showSettingsButton() {
   if("/sote/0.do" == document.location.pathname) {
@@ -792,9 +787,10 @@ function resetUser(e) {
 function patientAccounting() {
   if(!(["/sote/101315.do","/sote/101307.do"].includes(document.location.pathname))) return;
   if(!checkUnfiltered()) return;
+  var userre = new RegExp("^(?:COVID\\W+)?((?!COVID)[A-ZÁÉÍÓÖŐÚÜŰ\\.\\-]{2,}|VaPe)(?:\\W|$)");
   var currentPage = (document.location.pathname == "/sote/101307.do") ? "triage" : "pending";
   var now = Date.now();
-  var kbaPatientList = GM_getValue("kbaPatientList", {});
+  var evnPatientList = GM_getValue("evnPatientList", {});
 
   var triagelabel = -1;
   var headers = document.querySelectorAll("table.clabel th");
@@ -804,57 +800,173 @@ function patientAccounting() {
       break;
     }
   }
-  if(triagelabel != -1) {
-    var notes = document.querySelectorAll("#A1_4_body > tr> td:nth-child("+ (triagelabel+1) +")");
-    for(var i =  0 ; i<notes.length; i++) {
-      var kba = notes[i].parentNode.dataset.mategascriptKba;
-      //console.log(kba);
-      var patient = {};
-      if(!(kba in kbaPatientList)) {
-        patient = {firstSeen: now, firstSeenState: currentPage, currentState: currentPage, stateChanges: [], lastSeen: now};
-        kbaPatientList[kba] = patient;
-      } else {
-        patient = kbaPatientList[kba];
-        if(patient["currentState"] != currentPage) {
-          patient.stateChanges.push({
-            from: patient["currentState"],
-            to: currentPage,
-            at: now
-          });
-          patient["currentState"] = currentPage;
-        }
-        patient["lastSeen"] = now;
-      }
+  var notes = document.querySelectorAll("#A1_4_body > tr> td:nth-child("+ (triagelabel+1) +")");
+  for(var i =  0 ; i<notes.length; i++) {
+    var evn = notes[i].parentNode.dataset.mategascriptEvn;
+    var notelabel = notes[i].innerHTML;
+    var result = userre.exec(notelabel);
+    if(result) {
+      var doctor = user_map(result[1]);
+    } else {
+      doctor = "";
     }
-    if(currentPage == "pending") {
-      var kbas = Object.keys(kbaPatientList);
-      for(var i=0; i<kbas.length; i++) {
-        var patient = kbaPatientList[kbas[i]];
-        if((patient.currentState == "pending") && (patient.lastSeen != now)) {
-          patient.stateChanges.push({
-            from: patient["currentState"],
-            to: "removed",
-            at: now
-          });
-          patient.currentState = "removed";
-        }
-      }
+    //console.log(evn);
+    var patient = {};
+    var patientState = {at: now, state: currentPage, doctor: doctor};
+    if(!(evn in evnPatientList)) {
+      patient = {states: [patientState]};
+      evnPatientList[evn] = patient;
     }
-    GM_setValue("kbaPatientList", kbaPatientList);
+    patient = evnPatientList[evn];
+    patient.lastSeen = now;
+    patient.note = notelabel;
+    var lastPatientState = patient.states[patient.states.length - 1];
+    if(lastPatientState.state != patientState.state || lastPatientState.doctor != patientState.doctor) patient.states.push(patientState);
   }
+  var evns = Object.keys(evnPatientList);
+  for(var i=0; i < evns.length; i++) {
+    if(evnPatientList[evns[i]].lastSeen == now) continue;
+    var lastState = evnPatientList[evns[i]].states[evnPatientList[evns[i]].states.length - 1];
+    if(lastState.state == currentPage) {
+      var state = JSON.parse(JSON.stringify(lastState));
+      state.at = now;
+      if(currentPage == "triage") state.state = "pending";
+      if(currentPage == "pending") state.state = "done";
+      evnPatientList[evns[i]].states.push(state);
+    }
+  }
+  GM_setValue("evnPatientList", evnPatientList);
+
+  // Insert the dropdown list
+
+  var dropdowns = document.querySelectorAll("div.dropdown");
+  var dropdown = dropdowns[dropdowns.length-1];
+  var newitem = document.createElement("div");
+  newitem.classList.add("dropdown");
+  var newbtn = document.createElement("button");
+  newitem.appendChild(newbtn);
+  newbtn.classList.add("dropbtn");
+  newbtn.setAttribute("type", "button");
+  newbtn.innerHTML = "Ellátott betegek";
+  dropdown.after(" ", newitem);
+  var dropdiv = document.createElement("div");
+  dropdiv.setAttribute("id", "MATEGASCRIPT_DOCTOR_LOAD");
+  dropdiv.addEventListener("mouseenter", function(e) {mainFuncLib.dropDownMenuEnter(e);});
+  dropdiv.addEventListener("mouseleave", function(e) {mainFuncLib.dropDownMenuLeave(document, e);});
+  newbtn.addEventListener("mouseover", function() {mainFuncLib.dropDownMenuOpen(document, 'MATEGASCRIPT_DOCTOR_LOAD')});
+  newbtn.addEventListener("mouseout", function() {mainFuncLib.dropDownMenuButtonLeave(document, 'MATEGASCRIPT_DOCTOR_LOAD')});
+  dropdiv.classList.add("dropdown-content");
+  dropdiv.classList.add("cols1");
+  newbtn.after(dropdiv);
+  var droptable = document.createElement("table");
+  droptable.classList.add("mategascript_droptable");
+  dropdiv.appendChild(droptable);
+
+  var docs = {}
+  var evns = Object.keys(evnPatientList);
+  for(var i = 0; i < evns.length; i++) {
+    var patient = evnPatientList[evns[i]];
+    var lastState = patient.states[patient.states.length - 1];
+    if(lastState.doctor == "") continue;
+    if(!(lastState.doctor in docs)) {
+      docs[lastState.doctor] = {pending: 0, triage: 0, lastBegin: 0};
+    }
+    if(lastState.state == "triage") {
+      docs[lastState.doctor]["triage"]++;
+      continue;
+    }
+    if(lastState.state == "pending") {
+      docs[lastState.doctor]["pending"]++;
+      var beginTime = lastState.at;
+      for(j = patient.states.length - 2; j > -1; j--) {
+        if(patient.states[j].doctor != lastState.doctor || patient.states[j].state != "pending") {
+          beginTime = patient.states[j+1].at;
+          break;
+        }
+      }
+      docs[lastState.doctor]["lastBegin"] = Math.max(beginTime, docs[lastState.doctor]["lastBegin"]);
+      continue;
+    }
+  }
+
+  var orderedDocs = [];
+
+  while(Object.keys(docs) != 0) {
+    var mostRested = null;
+    var mostRest = 0;
+    var docsKeys = Object.keys(docs);
+    for(var i = 0; i < docsKeys.length; i++) {
+      if(mostRest < (now - docs[docsKeys[i]].lastBegin)) {
+        mostRested = docsKeys[i];
+        mostRest = now - docs[docsKeys[i]].lastBegin;
+      }
+    }
+    console.log(mostRested);
+    docs[mostRested]["name"] = mostRested;
+    orderedDocs.push(docs[mostRested]);
+    delete docs[mostRested];
+  }
+
+  var row = document.createElement("tr");
+  var td = document.createElement("th");
+    td.innerText = "Név";
+    row.appendChild(td);
+    td = document.createElement("th");
+    td.innerText = "Folyamatban";
+    row.appendChild(td);
+    td = document.createElement("th");
+    td.innerText = "Triage";
+    row.appendChild(td);
+    td = document.createElement("td");
+    td.innerText = "Utoljára elvitt";
+    row.appendChild(td);
+    /*td = document.createElement("td");
+    td.innerText = "Kész";
+    row.appendChild(td);*/
+    droptable.appendChild(row);
+  console.log(orderedDocs);
+  for(i = 0; i < orderedDocs.length; i++) {
+    var row = document.createElement("tr");
+    var td = document.createElement("td");
+    td.innerText = orderedDocs[i].name;
+    row.appendChild(td);
+    td = document.createElement("td");
+    td.innerText = orderedDocs[i].pending;
+    row.appendChild(td);
+    td = document.createElement("td");
+    td.innerText = orderedDocs[i].triage;
+    row.appendChild(td);
+    td = document.createElement("td");
+    td.innerText = orderedDocs[i].lastBegin;
+    row.appendChild(td);
+    /*
+    td = document.createElement("td");
+    td.innerText = pendingCounts[docnames[i]]["done"];
+    row.appendChild(td);*/
+    droptable.appendChild(row);
+  }
+  addGlobalStyle(`
+table.mategascript_droptable {
+  min-width: inherit;
+}
+table.mategascript_droptable th {
+  width: 33%;
+}
+    `);
+
 }
 
 function patientAccountingPrune() {
   var now = Date.now();
-  var kbaPatientList = GM_getValue("kbaPatientList", {});
-  var kbas = Object.keys(kbaPatientList);
-  for(var i=0; i<kbas.length; i++) {
-    var patient = kbaPatientList[kbas[i]];
+  var evnPatientList = GM_getValue("evnPatientList", {});
+  var evns = Object.keys(evnPatientList);
+  for(var i=0; i<evns.length; i++) {
+    var patient = evnPatientList[evns[i]];
     if(patient["lastSeen"] < now - 86400000) {
-      delete kbaPatientList[kbas[i]];
+      delete evnPatientList[evns[i]];
     }
   }
-  GM_setValue("kbaPatientList", kbaPatientList);
+  GM_setValue("evnPatientList", evnPatientList);
 }
 
 if(getUserPref("patientAccounting")) {
