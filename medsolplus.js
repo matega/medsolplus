@@ -7,7 +7,7 @@
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @grant       GM.xmlHttpRequest
-// @version     1.06
+// @version     1.07
 // @downloadURL https://raw.githubusercontent.com/matega/medsolplus/master/medsolplus.js
 // @author      Dr. Galambos Máté | galambos.mate@semmelweis.hu
 // @description e-MedSolution extra funkciók a sürgősségi osztályon (KSBA)
@@ -445,6 +445,7 @@ function autoAgeCallback2(e) {
     if(birthdate > new Date()) yearDiff--;
     var birthdatenode = e[i].target.parentNode.querySelector("input#FH0_birthdate");
     birthdatenode.value = birthdatenode.value + " (" + yearDiff + ")";
+    birthdatenode.size = parseInt(birthdatenode.size) + 4;
   }
 }
 
@@ -893,7 +894,7 @@ function patientAccounting() {
 
   while(Object.keys(docs) != 0) {
     var mostRested = null;
-    var mostRest = 0;
+    var mostRest = -1;
     var docsKeys = Object.keys(docs);
     for(var i = 0; i < docsKeys.length; i++) {
       if(mostRest < (now - docs[docsKeys[i]].lastBegin)) {
@@ -917,8 +918,8 @@ function patientAccounting() {
     td = document.createElement("th");
     td.innerText = "Triage";
     row.appendChild(td);
-    td = document.createElement("td");
-    td.innerText = "Utoljára elvitt";
+    td = document.createElement("th");
+    td.innerText = "Pihent";
     row.appendChild(td);
     /*td = document.createElement("td");
     td.innerText = "Kész";
@@ -926,6 +927,7 @@ function patientAccounting() {
     droptable.appendChild(row);
   console.log(orderedDocs);
   for(i = 0; i < orderedDocs.length; i++) {
+    if(orderedDocs[i].pending == 0 && orderedDocs[i].triage==0) continue;
     var row = document.createElement("tr");
     var td = document.createElement("td");
     td.innerText = orderedDocs[i].name;
@@ -937,7 +939,9 @@ function patientAccounting() {
     td.innerText = orderedDocs[i].triage;
     row.appendChild(td);
     td = document.createElement("td");
-    td.innerText = orderedDocs[i].lastBegin;
+    var pihent = Math.floor((now - orderedDocs[i].lastBegin) / 60000);
+    if(pihent > 12*60) pihent = "∞";
+    td.innerText = pihent + " min";
     row.appendChild(td);
     /*
     td = document.createElement("td");
