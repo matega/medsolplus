@@ -7,7 +7,7 @@
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @grant       GM.xmlHttpRequest
-// @version     1.07
+// @version     1.08
 // @downloadURL https://raw.githubusercontent.com/matega/medsolplus/master/medsolplus.js
 // @author      Dr. Galambos Máté | galambos.mate@semmelweis.hu
 // @description e-MedSolution extra funkciók a sürgősségi osztályon (KSBA)
@@ -941,7 +941,7 @@ function patientAccounting() {
     td = document.createElement("td");
     var pihent = Math.floor((now - orderedDocs[i].lastBegin) / 60000);
     if(pihent > 12*60) pihent = "∞";
-    td.innerText = pihent + " min";
+    td.innerText = pihent + "'";
     row.appendChild(td);
     /*
     td = document.createElement("td");
@@ -1022,6 +1022,61 @@ function resetButton() {
 
 if(getUserPref("resetButton")) {
   resetButton();
+}
+
+function ptLoc() {
+  var locno = getUserPref("patientLocNo");
+  var locw = getUserPref("patientLocWidth");
+  if(locno === false || !locw) return;
+  var locre = /\(([TVFŐS]\d{0,2})\)/;
+  if(["/sote/101315.do","/sote/101307.do"].includes(document.location.pathname)) {
+    var triagelabel = -1;
+    var headers = document.querySelectorAll("table.clabel th");
+    for(var i = 0; i<headers.length; i++) {
+      if(headers[i].innerHTML == "Triage megjegyzés") {
+        triagelabel = i;
+        break;
+      }
+    }
+
+    var cols = document.querySelectorAll("div#A1_3 > table > colgroup > col");
+    var oldw = parseInt(cols[locno].getAttribute("width"));
+    if(locw > oldw) return;
+    cols[locno].setAttribute("width", (oldw - locw) + "%*");
+    var newcol = document.createElement("col");
+    newcol.setAttribute("width", locw + "%*");
+    cols[locno].before(newcol);
+
+    var newhead = document.createElement("th");
+    newhead.innerText = "Hely";
+    document.querySelector("div#A1_3 > table > tbody > tr").children[locno].before(newhead);
+
+    cols = document.querySelectorAll("table#A1_4 > colgroup > col");
+    oldw = parseInt(cols[locno].getAttribute("width"));
+    if(locw > oldw) return;
+    cols[locno].setAttribute("width", (oldw - locw) + "%*");
+    newcol = document.createElement("col");
+    newcol.setAttribute("width", locw + "%*");
+    cols[locno].before(newcol);
+
+    if(triagelabel != -1) {
+      var rows = document.querySelectorAll("#A1_4_body > tr");
+      for(var i = 0; i < rows.length; i++) {
+        var triagetext = rows[i].children[triagelabel].innerText;
+        console.log(triagetext);
+        var match = triagetext.match(locre);
+        if(match) rows[i].children[triagelabel].innerText = triagetext.replace(locre, " ");
+
+        var loctd = document.createElement("td");
+        if(match) loctd.innerText = match[1]; else loctd.innerText = "??";
+        rows[i].children[locno].before(loctd);
+      }
+    }
+  }
+}
+
+if(getUserPref("patientLoc")) {
+  ptLoc();
 }
 
 showSettingsButton();
