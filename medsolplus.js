@@ -7,7 +7,7 @@
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @grant       GM.xmlHttpRequest
-// @version     1.08
+// @version     1.10
 // @downloadURL https://raw.githubusercontent.com/matega/medsolplus/master/medsolplus.js
 // @author      Dr. Galambos Máté | galambos.mate@semmelweis.hu
 // @description e-MedSolution extra funkciók a sürgősségi osztályon (KSBA)
@@ -223,6 +223,7 @@ function patientListIdenticons() {
 function uFrameIdenticons() {
   if(document.location.pathname != "/sote/UpdateFrame.fl") return;
   var nameDiv = document.querySelector("#report_table > tbody > tr:nth-child(3) > td div");
+  if(!nameDiv) return;
   var patname = nameDiv.innerHTML.trim();
   var identicon = document.createElement("canvas");
   identicon.setAttribute("class", "mategascript-identicon");
@@ -275,8 +276,10 @@ function autoTEK(label) {
   romai = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII', 'XIII', 'XIV', 'XV', 'XVI', 'XVII', 'XVIII', 'XIX', 'XX', 'XXI', 'XXII', 'XXIII'];
   extendNode = null;
   if("/sote/UpdateFrame.fl" != document.location.pathname) return;
+  console.log("autotek");
   var nodes = document.querySelectorAll("#report_table>tbody>tr>td:first-child");
   for(var i=0; i<nodes.length; i++) {
+    console.log("autoteklabel " + label);
     if(label == nodes[i].innerText) {
       var parent = nodes[i].parentNode;
       var tdnum = 3;
@@ -286,24 +289,27 @@ function autoTEK(label) {
       cim.classList.add("mategascript-address");
       var cimtext = cim.innerText;
       var cmatch = cimtext.match(cimre);
-      //console.log(cimtext);
+      console.log(cimtext);
       if(!cmatch) continue;
       //console.log(cmatch);
       var varos = cmatch[1] == "1"?("Budapest " + romai[parseInt(cmatch[2])-1] + ". kerület"):(cmatch[3]);
-      GM.xmlHttpRequest(
-        {
-          "url": "http://84.206.43.26:7080/ellatas/xtek/",
-          "method": "GET",
-          "context": {"stage": 0, "cim": cim, "varos": varos, "data": "id12_hf_0=&ac="+encodeURIComponent(varos)+"&tekszakmak%3Aszakmakform%3Atekszakmak=0&tekszakmak%3Aszakmakform%3Aord_szakma=on&elerhment.x=5&elerhment.y=5"},
-          "onload": xtekcb,
-          "onerror": autoTEKSequential,
-          "headers": {
-            "Content-Type": "application/x-www-form-urlencoded",
-            "Origin": "http://84.206.43.26:7080",
-            "Referer": "http://84.206.43.26:7080/ellatas/xtek/"
-          }
+      console.log(varos);
+      var xtekrequest = {
+        "url": "http://84.206.43.26:7080/ellatas/xtek/",
+        "method": "GET",
+        "context": {"stage": 0, "cim": cim, "varos": varos, "data": "id12_hf_0=&ac="+encodeURIComponent(varos)+"&tekszakmak%3Aszakmakform%3Atekszakmak=0&tekszakmak%3Aszakmakform%3Aord_szakma=on&elerhment.x=5&elerhment.y=5"},
+        "onload": xtekcb,
+        "onerror": autoTEKSequential,
+        "headers": {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Origin": "http://84.206.43.26:7080",
+          "Referer": "http://84.206.43.26:7080/ellatas/xtek/"
         }
-      );
+      }
+      console.log(xtekrequest);
+      var result = GM.xmlHttpRequest(xtekrequest);
+
+      console.log(result);
       return;
     }
   }
@@ -311,6 +317,7 @@ function autoTEK(label) {
 }
 
 function xtekcb(e) {
+  console.log(e);
   if(e.context.stage == 0) {
     var url = new URL(new DOMParser().parseFromString(e.responseText, "text/html").querySelectorAll("form")[0].getAttribute("action"), "http://84.206.43.26:7080/ellatas/xtek/").href;
     GM.xmlHttpRequest(
@@ -627,9 +634,7 @@ function mategascript_reset_query() {
       console.log(e, unfilteredParams[i]);
     }
   }
-  console.log("aaaa");
   doRefresh();
-  console.log("bbbb");
 }
 
 function user_map(user) {
@@ -642,6 +647,7 @@ if(getUserPref("loadList")) loadList();
 function triageButtonTame() {
   if("/sote/101315.do" == document.location.pathname) {
     var triageButton = document.getElementById("A_103201");
+    if(!triageButton) return;
     triageButton.classList.remove("blinking");
     new MutationObserver(triageButtonTameCallback).observe(triageButton, {attributes: true, attributeFilter: ["class"]});
     addGlobalStyle(`
@@ -902,7 +908,7 @@ function patientAccounting() {
         mostRest = now - docs[docsKeys[i]].lastBegin;
       }
     }
-    console.log(mostRested);
+    //console.log(mostRested);
     docs[mostRested]["name"] = mostRested;
     orderedDocs.push(docs[mostRested]);
     delete docs[mostRested];
@@ -925,7 +931,7 @@ function patientAccounting() {
     td.innerText = "Kész";
     row.appendChild(td);*/
     droptable.appendChild(row);
-  console.log(orderedDocs);
+  //console.log(orderedDocs);
   for(i = 0; i < orderedDocs.length; i++) {
     if(orderedDocs[i].pending == 0 && orderedDocs[i].triage==0) continue;
     var row = document.createElement("tr");
@@ -1063,9 +1069,12 @@ function ptLoc() {
       var rows = document.querySelectorAll("#A1_4_body > tr");
       for(var i = 0; i < rows.length; i++) {
         var triagetext = rows[i].children[triagelabel].innerText;
-        console.log(triagetext);
+        // console.log(triagetext);
         var match = triagetext.match(locre);
-        if(match) rows[i].children[triagelabel].innerText = triagetext.replace(locre, " ");
+        if(match) {
+          rows[i].children[triagelabel].innerText = triagetext.replace(locre, " ");
+          rows[i].children[triagelabel].dataset.mategascriptOriginalText = triagetext
+        }
 
         var loctd = document.createElement("td");
         if(match) loctd.innerText = match[1]; else loctd.innerText = "??";
@@ -1077,6 +1086,172 @@ function ptLoc() {
 
 if(getUserPref("patientLoc")) {
   ptLoc();
+}
+
+inlineNoteEditStatus = {
+  currentNode: null,
+  needFrame: false,
+  outerFrame: null,
+  innerFrame: null,
+  submitFrame: null,
+  needEditDescription: false,
+  needSubmmit: false
+};
+
+function inlineNoteEdit() {
+  if(["/sote/101315.do","/sote/101307.do"].includes(document.location.pathname)) {
+    var triagelabel = -1;
+    var headers = document.querySelectorAll("table.clabel th");
+    for(var i = 0; i<headers.length; i++) {
+      if(headers[i].innerHTML == "Triage megjegyzés") {
+        triagelabel = i;
+        break;
+      }
+    }
+    if(triagelabel == -1) return;
+    var notetds = document.querySelectorAll("#A1_4_body>tr>td:nth-child("+(triagelabel+1)+")");
+    for(var i=0; i<notetds.length; i++) {
+      notetds[i].setAttribute("onClick", "");
+      notetds[i].addEventListener("focus", inlineNoteEditFocusHandler);
+      notetds[i].addEventListener("blur", inlineNoteEditBlurHandler);
+      notetds[i].addEventListener("keydown", inlineNoteEditKeypressHandler);
+      notetds[i].contentEditable = "true";
+      notetds[i].spellcheck = false;
+      notetds[i].classList.add("mategascript-inline-edit");
+      notetds[i].dataset.mategascriptOriginalText = notetds[i].dataset.mategascriptOriginalText || notetds[i].innerText;
+    }
+    addGlobalStyle(`
+td.mategascript-inline-edit {
+  cursor: text;
+}
+                  `);
+    unsafeWindow.inlineNoteEditShim = inlineNoteEditShim;
+  } else if(document.location.pathname == "/sote/UpdateFrame.fl") {
+    var frameelement = window.parent.frameElement;
+    if(!frameelement.dataset.mategascriptNewTriageNote) return;
+    var inputelement = document.getElementsByName("U.DUMMY.20")[0];
+    inputelement.value = frameelement.dataset.mategascriptNewTriageNote;
+    init();
+    top.funcLib.doInvokeOpenerAtClose = function(){};
+    doOK();
+  }
+}
+
+function inlineNoteEditFocusHandler(e) {
+  e.target.spellcheck = true;
+}
+
+function inlineNoteEditBlurHandler(e) {
+  e.target.spellcheck = false;
+  e.target.innerText = e.target.innerText;
+}
+
+function inlineNoteEditKeypressHandler(e) {
+  console.log(e);
+  if(e.key == "Enter" || e.key == "F10") {
+    e.stopPropagation();
+    e.target.blur();
+    inlineNoteEditStatus.currentNode = e.target;
+    var fmb = mainFuncLib.flatMode;
+    mainFuncLib.flatMode = true;
+    var quickbuttons = e.target.parentNode.querySelectorAll("td>div>div");
+    for(var i = quickbuttons.length - 1; i >= 0; i--) {
+      if(quickbuttons[i].getAttribute("onmouseover").includes("'Triage megjegyzés'")) {
+        var origonclick = quickbuttons[i].getAttribute("onclick");
+        var callbacknumber = ""+(1000000 + Math.floor(e.timeStamp % 1000000));
+        var newonclick = origonclick.replace(/javascript:(doAH1(?:_AcAuth)?)\(/, "inlineNoteEditShim(\"0\",\"" +callbacknumber+ "\",$1,");
+        var mo = new MutationObserver(function(cbn, td){return function(recs, obs){inlineNoteEditMutationObserver(cbn, td, recs, obs)}}(callbacknumber, e.target));
+        mo.observe(window.top.document, {subtree: true, childList: true});
+        unsafeWindow.eval(newonclick);
+        mainFuncLib.flatMode = fmb;
+        break;
+      }
+    }
+  }
+  if(e.key == "Escape") {
+    e.stopPropagation();
+    e.target.blur();
+    e.target.innerText = e.target.dataset.mategascriptOriginalText;
+  }
+}
+
+function inlineNoteEditShim(width, height, handler, ...rest) {
+  console.log("inlineNoteEditShim called");
+  console.log(arguments);
+  var r2c = rest[rest.length-1].slice();
+  r2c[4] = width;
+  r2c[5] = height;
+  rest[rest.length-1] = r2c;
+  handler(...rest);
+}
+
+function inlineNoteEditMutationObserver(cbn, td, recs, obs) {
+  console.log(td);
+  for(var i = 0; i < recs.length; i++) {
+    for(var j = 0; j < recs[i].addedNodes.length; j++) {
+      var curNode = recs[i].addedNodes[j];
+      console.log(curNode);
+      if(curNode.tagName != "IFRAME") continue;
+      if(curNode.getAttribute("style").includes("opacity: 0.62")) {
+        curNode.setAttribute("style", "display: none;");
+        continue;
+      }
+      if(curNode.getAttribute("desiredheight") == cbn) {
+        obs.disconnect();
+        curNode.dataset.mategascriptNewTriageNote = td.innerText;
+        curNode.setAttribute("style", "display: none;");
+      }
+    }
+  }
+}
+
+if(getUserPref("inlineNoteEdit")) {
+  inlineNoteEdit();
+}
+
+function patientInNewWindow() {
+  if(["/sote/101315.do"].includes(document.location.pathname)) {
+    var clickabletds = document.querySelectorAll("#A1_4_body>tr>td");
+    for(var i=0; i<clickabletds.length; i++) {
+      var ctd = clickabletds[i];
+      var ocl = ctd.getAttribute("onclick");
+      if(typeof ocl == "string" && ocl.includes("A300322")) {
+        ctd.setAttribute("onclick", ocl.replace("javascript:doAH1_AcAuth(", "javascript:patientInNewWindowClickHandler(event,"));
+      }
+    }
+    unsafeWindow.patientInNewWindowClickHandler = patientInNewWindowClickHandler;
+  }
+}
+
+function patientInNewWindowClickHandler(event, ...rest) {
+  if(event.ctrlKey) {
+    console.log(event);
+    var r3c = rest[3].slice();
+    r3c[2] = "new";
+    r3c[4] = "1024";
+    rest[3] = r3c;
+  }
+  var fmb = mainFuncLib.flatMode;
+  mainFuncLib.flatMode = false;
+  doAH1_AcAuth(...rest);
+  mainFuncLib.flatMode = fmb;
+}
+
+if(getUserPref("patientInNewWindow")) {
+  patientInNewWindow();
+}
+
+function popupsAreTabs() {
+  unsafeWindow.open = function(open) {
+    return function() {
+      console.log(arguments);
+      return open(...Array.prototype.slice.call(arguments, 0, 2));
+    }
+  }(unsafeWindow.open);
+}
+
+if(getUserPref("popupsAreTabs")) {
+  popupsAreTabs();
 }
 
 showSettingsButton();
