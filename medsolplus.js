@@ -7,7 +7,7 @@
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @grant       GM.xmlHttpRequest
-// @version     1.12
+// @version     1.13
 // @downloadURL https://raw.githubusercontent.com/matega/medsolplus/master/medsolplus.js
 // @author      Dr. Galambos Máté | galambos.mate@semmelweis.hu
 // @description e-MedSolution extra funkciók a sürgősségi osztályon (KSBA)
@@ -1175,6 +1175,7 @@ function inlineNoteEditKeypressHandler(e) {
   console.log(e);
   if(e.key == "Enter" || e.key == "F10") {
     e.stopPropagation();
+    e.preventDefault();
     e.target.classList.remove("success");
     e.target.classList.add("changed");
     e.target.blur();
@@ -1245,7 +1246,7 @@ function patientInNewWindow() {
     for(var i=0; i<clickabletds.length; i++) {
       var ctd = clickabletds[i];
       var ocl = ctd.getAttribute("onclick");
-      if(typeof ocl == "string" && ocl.includes("A300322")) {
+      if(typeof ocl == "string" && (ocl.includes("A300322") || ocl.includes("A300695"))) {
         ctd.setAttribute("onclick", ocl.replace("javascript:doAH1_AcAuth(", "javascript:patientInNewWindowClickHandler(event,"));
       }
     }
