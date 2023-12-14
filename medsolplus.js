@@ -7,7 +7,7 @@
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @grant       GM.xmlHttpRequest
-// @version     1.13
+// @version     1.14
 // @downloadURL https://raw.githubusercontent.com/matega/medsolplus/master/medsolplus.js
 // @author      Dr. Galambos Máté | galambos.mate@semmelweis.hu
 // @description e-MedSolution extra funkciók a sürgősségi osztályon (KSBA)
@@ -15,11 +15,11 @@
 // ==/UserScript==
 
 settingsSkeleton = {
-  "colorOwnPatients": true,
+  "colorOwnPatients": false,
   "fixHighlights": false,
   "autoExpandQuickButtons": true,
-  "patientListIdenticons": true,
-  "uFrameIdenticons": true,
+  "patientListIdenticons": false,
+  "uFrameIdenticons": false,
   "autoAge": true,
   "autoTEK": true,
   "autoTEKSpecList": [
@@ -32,15 +32,19 @@ settingsSkeleton = {
   ],
   "loadList": true,
   "triageButtonTame": true,
-  "hideevn": true,
+  "hideevn": false,
   "triageName": "",
-  "patientAccounting": true
+  "patientAccounting": false,
+  "inlineNoteEdit": true,
+  "popupsAreTabs": false,
+  "patientInNewWindow": true
 }
 
 function getUserPref(prefName) {
   var userPrefs = GM_getValue("userPrefs", {});
-  if(!(currentUser in userPrefs)) return false;
-  return userPrefs[currentUser][prefName];
+  if(currentUser in userPrefs) return userPrefs[currentUser][prefName];
+  if("*" in userPrefs) return userPrefs["*"][prefName];
+  return false;
 }
 
 function setUserPref(prefName, value) {
