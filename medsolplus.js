@@ -7,7 +7,7 @@
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @grant       GM.xmlHttpRequest
-// @version     1.14
+// @version     1.15
 // @downloadURL https://raw.githubusercontent.com/matega/medsolplus/master/medsolplus.js
 // @author      Dr. Galambos Máté | galambos.mate@semmelweis.hu
 // @description e-MedSolution extra funkciók a sürgősségi osztályon (KSBA)
@@ -44,6 +44,7 @@ function getUserPref(prefName) {
   var userPrefs = GM_getValue("userPrefs", {});
   if(currentUser in userPrefs) return userPrefs[currentUser][prefName];
   if("*" in userPrefs) return userPrefs["*"][prefName];
+  if(!GM_getValue("noDefaults", false)) return settingsSkeleton[prefName];
   return false;
 }
 
@@ -305,15 +306,15 @@ function autoTEK(label) {
         "onload": xtekcb,
         "onerror": autoTEKSequential,
         "headers": {
-          "Content-Type": "application/x-www-form-urlencoded",
-          "Origin": "http://84.206.43.26:7080",
-          "Referer": "http://84.206.43.26:7080/ellatas/xtek/"
+          //"Content-Type": "application/x-www-form-urlencoded",
+          //"Origin": "http://84.206.43.26:7080",
+          //"Referer": "http://84.206.43.26:7080/ellatas/xtek/"
         }
       }
-      console.log(xtekrequest);
+      console.log("sending request: ", xtekrequest);
       var result = GM.xmlHttpRequest(xtekrequest);
 
-      console.log(result);
+      console.log("request result: ", result);
       return;
     }
   }
@@ -424,7 +425,8 @@ table.mategascript-tekdropdown td.mategascript-address-row {
 autoTEKLabels = ["Lakcím", "Ideiglenes lakcím:"];
 autoTEKStage = 0;
 
-function autoTEKSequential() {
+function autoTEKSequential(e) {
+  if(e) console.log("Caught error in AutoTekSequential: ", e);
   if(autoTEKStage < autoTEKLabels.length) autoTEK(autoTEKLabels[autoTEKStage++]);
 }
 
@@ -1152,7 +1154,7 @@ td.mategascript-inline-edit.success {
     });
   } else if(document.location.pathname == "/sote/UpdateFrame.fl") {
     var frameelement = window.parent.frameElement;
-    if(!frameelement.dataset.mategascriptNewTriageNote) return;
+    if(!frameelement || !frameelement.dataset.mategascriptNewTriageNote) return;
     var inputelement = document.getElementsByName("U.DUMMY.20")[0];
     if(!inputelement) return;
     var text = frameelement.dataset.mategascriptNewTriageNote
