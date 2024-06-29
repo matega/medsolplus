@@ -7,7 +7,7 @@
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @grant       GM.xmlHttpRequest
-// @version     1.16
+// @version     1.18
 // @downloadURL https://raw.githubusercontent.com/matega/medsolplus/master/medsolplus.js
 // @author      Dr. Galambos Máté | galambos.mate@semmelweis.hu
 // @description e-MedSolution extra funkciók a sürgősségi osztályon (KSBA)
@@ -1102,7 +1102,8 @@ inlineNoteEditStatus = {
   innerFrame: null,
   submitFrame: null,
   needEditDescription: false,
-  needSubmmit: false
+  needSubmmit: false,
+  inhibitRefresh: false
 };
 
 function inlineNoteEdit() {
@@ -1122,6 +1123,7 @@ function inlineNoteEdit() {
       notetds[i].addEventListener("focus", inlineNoteEditFocusHandler);
       notetds[i].addEventListener("blur", inlineNoteEditBlurHandler);
       notetds[i].addEventListener("keydown", inlineNoteEditKeypressHandler);
+      notetds[i].addEventListener("input", inlineNoteEditInputHandler);
       notetds[i].contentEditable = "true";
       notetds[i].spellcheck = false;
       notetds[i].classList.add("mategascript-inline-edit");
@@ -1138,6 +1140,9 @@ td.mategascript-inline-edit.changed {
 td.mategascript-inline-edit.success {
   animation: flashgreen 2s linear 0s 1;
 }
+td.mategascript-invalid {
+  background-color: rgb(255,100,100) !important;
+}
 @keyframes flashgreen {
   from {background-color: lightgreen;}
   50% {background-color: lightgreen;}
@@ -1151,8 +1156,23 @@ td.mategascript-inline-edit.success {
         origtd.classList.remove("changed");
         origtd.classList.add("success");
         origtd.innerText = e.data.text;
+        origtd.dataset.mategascriptOriginalText = e.data.text;
+        inlineNoteEditStatus.inhibitRefresh = false;
       }
     });
+    if(document.location.pathname == "/sote/101307.do") {
+      var filterbutton = document.querySelectorAll("#filterbutton_a");
+      for(var i = 0; i < filterbutton.length; i++) {
+        filterbutton[i].removeAttribute("href");
+        filterbutton[i].addEventListener("click", () => doRefresh(true));
+      }
+      doRefresh = ((dro) => {
+        return function(force) {
+          if(force || !inlineNoteEditStatus.inhibitRefresh) return dro();
+          console.log("Refresh inhibited");
+        };
+      })(doRefresh);
+    }
   } else if(document.location.pathname == "/sote/UpdateFrame.fl") {
     var frameelement = window.parent.frameElement;
     if(!frameelement || !frameelement.dataset.mategascriptNewTriageNote) return;
@@ -1171,18 +1191,20 @@ td.mategascript-inline-edit.success {
 
 function inlineNoteEditFocusHandler(e) {
   e.target.spellcheck = true;
+  inlineNoteEditStatus.inhibitRefresh = true;
 }
 
 function inlineNoteEditBlurHandler(e) {
   e.target.spellcheck = false;
   if(!e.target.classList.contains("changed")) e.target.innerText = e.target.dataset.mategascriptOriginalText;
+  inlineNoteEditStatus.inhibitRefresh = false;
 }
 
 function inlineNoteEditKeypressHandler(e) {
-  console.log(e);
   if(e.key == "Enter" || e.key == "F10") {
     e.stopPropagation();
     e.preventDefault();
+    if(e.target.innerText.length > 200) return false;
     e.target.classList.remove("success");
     e.target.classList.add("changed");
     e.target.blur();
@@ -1204,10 +1226,19 @@ function inlineNoteEditKeypressHandler(e) {
       }
     }
   }
-  if(e.key == "Escape") {
+  else if(e.key == "Escape") {
     e.stopPropagation();
     e.target.blur();
     e.target.innerText = e.target.dataset.mategascriptOriginalText;
+  }
+}
+
+function inlineNoteEditInputHandler(e) {
+  console.log(e.target.innerText);
+  if(e.target.innerText.length > 200) {
+    e.target.classList.add("mategascript-invalid");
+  } else {
+    e.target.classList.remove("mategascript-invalid");
   }
 }
 
