@@ -7,7 +7,7 @@
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @grant       GM.xmlHttpRequest
-// @version     1.18
+// @version     1.20
 // @downloadURL https://raw.githubusercontent.com/matega/medsolplus/master/medsolplus.js
 // @author      Dr. Galambos Máté | galambos.mate@semmelweis.hu
 // @description e-MedSolution extra funkciók a sürgősségi osztályon (KSBA)
@@ -39,6 +39,39 @@ settingsSkeleton = {
   "popupsAreTabs": false,
   "patientInNewWindow": true,
   "resetButton": true
+}
+
+intMedAssign = {
+  "Semmelweis Egyetem (BOK)": ["Dunaharaszti",
+"Dunavarsány",
+"Érd",
+"Halásztelek",
+"Majosháza",
+"Százhalombatta",
+"Szigethalom",
+"Taksony",
+"Tököl"],
+  "Semmelweis Egyetem (BHK)": ["Apaj",
+"Áporka",
+"Biatorbágy",
+"Budaörs",
+"Délegyháza",
+"Diósd",
+"Dömsöd",
+"Herceghalom",
+"Kiskunlacháza",
+"Lórév",
+"Makád",
+"Pusztazámor",
+"Ráckeve",
+"Sóskút",
+"Szigetbecse",
+"Szigetcsép",
+"Szigetszentmárton",
+"Szigetszentmiklós",
+"Szigetújfalu",
+"Tárnok",
+"Törökbálint"]
 }
 
 function getUserPref(prefName) {
@@ -358,6 +391,16 @@ function xtekcb(e) {
         var spectext = specnummatch[2];
         var prognummatch = tdtexts[2].match(prognumre);
         var prognum = specnum + ":" + (prognummatch[1] || prognummatch[2].length) + prognummatch[3] + ":" + prognummatch[4].substring(0,1);
+        if(prognum == "0100:1:a" && hosp == "Semmelweis Egyetem") {
+          for(where in intMedAssign) {
+            if(intMedAssign[where].includes(e.context.varos)) {
+              hosp = where;
+            }
+          }
+          if(hosp == "Semmelweis Egyetem") {
+            hosp = "Semmelweis Egyetem (<a href=\"https://docs.google.com/spreadsheets/d/11w24ztMLm8ogPG9P4MBJcUkspSrtDpee3jlriTDBXLc/edit\" target=\"_blank\">táblázat alapján</a>)";
+          }
+        }
         hosps[prognum] = {hosp: hosp, spec: spectext};
       } catch(e) {
         console.log(e, tdtexts);
@@ -384,7 +427,7 @@ function xtekcb(e) {
         hospCell.innerText = filteredHosps[i]["spec"];
         hospRow.appendChild(hospCell);
         hospCell = document.createElement("td");
-        hospCell.innerText = filteredHosps[i]["hosp"];
+        hospCell.innerHTML = filteredHosps[i]["hosp"];
         hospRow.appendChild(hospCell);
         tekDropdown.appendChild(hospRow);
       } catch (e) {
@@ -417,6 +460,10 @@ table.mategascript-tekdropdown td.mategascript-address-row {
 }
 .mategascript-position-relative {
   position: relative;
+}
+table.mategascript-tekdropdown a[target="_blank"]::after {
+  content: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAQElEQVR42qXKwQkAIAxDUUdxtO6/RBQkQZvSi8I/pL4BoGw/XPkh4XigPmsUgh0626AjRsgxHTkUThsG2T/sIlzdTsp52kSS1wAAAABJRU5ErkJggg==);
+  margin: 0 3px 0 5px;
 }
     `);
     autoTEKSequential();
