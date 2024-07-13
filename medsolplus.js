@@ -7,7 +7,7 @@
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @grant       GM.xmlHttpRequest
-// @version     1.20
+// @version     1.21
 // @downloadURL https://raw.githubusercontent.com/matega/medsolplus/master/medsolplus.js
 // @author      Dr. Galambos Máté | galambos.mate@semmelweis.hu
 // @description e-MedSolution extra funkciók a sürgősségi osztályon (KSBA)
@@ -134,7 +134,7 @@ function colorOwnPatients() {
   if(!(["/sote/101315.do","/sote/101307.do"].includes(document.location.pathname))) return;
   var userTriageName = getUserPref("triageName");
   if(!userTriageName) return;
-  var firstre = new RegExp("^(?:COVID\\W+)?" + userTriageName + "(?:\\W|$)");
+  var firstre = new RegExp("^(?:COVID\\W+|\\[[^\\]]+\\]\\W+)?" + userTriageName + "(?:\\W|$)");
   var otherre = new RegExp("\\W" + userTriageName + "(?:\\W|$)");
   var donere = /(?:>>|\W-{2,}>>?)/;
   var attnre = /!!/;
