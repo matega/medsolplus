@@ -7,7 +7,7 @@
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @grant       GM.xmlHttpRequest
-// @version     1.21
+// @version     1.22
 // @downloadURL https://raw.githubusercontent.com/matega/medsolplus/master/medsolplus.js
 // @author      Dr. Galambos Máté | galambos.mate@semmelweis.hu
 // @description e-MedSolution extra funkciók a sürgősségi osztályon (KSBA)
@@ -391,6 +391,9 @@ function xtekcb(e) {
         var spectext = specnummatch[2];
         var prognummatch = tdtexts[2].match(prognumre);
         var prognum = specnum + ":" + (prognummatch[1] || prognummatch[2].length) + prognummatch[3] + ":" + prognummatch[4].substring(0,1);
+        if(prognum == "0100:1:a" && e.context.varos == "Budapest XVI. kerület") {
+          hosp = "Semmelweis Egyetem";
+        }
         if(prognum == "0100:1:a" && hosp == "Semmelweis Egyetem") {
           for(where in intMedAssign) {
             if(intMedAssign[where].includes(e.context.varos)) {
