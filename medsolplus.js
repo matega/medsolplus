@@ -7,7 +7,7 @@
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @grant       GM.xmlHttpRequest
-// @version     1.23
+// @version     1.24
 // @downloadURL https://raw.githubusercontent.com/matega/medsolplus/master/medsolplus.js
 // @author      Dr. Galambos Máté | galambos.mate@semmelweis.hu
 // @description e-MedSolution extra funkciók a sürgősségi osztályon (KSBA)
@@ -43,35 +43,35 @@ settingsSkeleton = {
 
 intMedAssign = {
   "Semmelweis Egyetem (BOK)": ["Dunaharaszti",
-"Dunavarsány",
-"Érd",
-"Halásztelek",
-"Majosháza",
-"Százhalombatta",
-"Szigethalom",
-"Taksony",
-"Tököl"],
+  "Dunavarsány",
+  "Érd",
+  "Halásztelek",
+  "Majosháza",
+  "Százhalombatta",
+  "Szigethalom",
+  "Taksony",
+  "Tököl"],
   "Semmelweis Egyetem (BHK)": ["Apaj",
-"Áporka",
-"Biatorbágy",
-"Budaörs",
-"Délegyháza",
-"Diósd",
-"Dömsöd",
-"Herceghalom",
-"Kiskunlacháza",
-"Lórév",
-"Makád",
-"Pusztazámor",
-"Ráckeve",
-"Sóskút",
-"Szigetbecse",
-"Szigetcsép",
-"Szigetszentmárton",
-"Szigetszentmiklós",
-"Szigetújfalu",
-"Tárnok",
-"Törökbálint"]
+  "Áporka",
+  "Biatorbágy",
+  "Budaörs",
+  "Délegyháza",
+  "Diósd",
+  "Dömsöd",
+  "Herceghalom",
+  "Kiskunlacháza",
+  "Lórév",
+  "Makád",
+  "Pusztazámor",
+  "Ráckeve",
+  "Sóskút",
+  "Szigetbecse",
+  "Szigetcsép",
+  "Szigetszentmárton",
+  "Szigetszentmiklós",
+  "Szigetújfalu",
+  "Tárnok",
+  "Törökbálint"]
 }
 
 function getUserPref(prefName) {
@@ -95,13 +95,13 @@ function htmlDecode(input) {
 }
 
 function addGlobalStyle(css) {
-    var head, style;
-    head = document.getElementsByTagName('head')[0];
-    if (!head) { return; }
-    style = document.createElement('style');
-    style.type = 'text/css';
-    style.innerHTML = css;
-    head.appendChild(style);
+  var head, style;
+  head = document.getElementsByTagName('head')[0];
+  if (!head) { return; }
+  style = document.createElement('style');
+  style.type = 'text/css';
+  style.innerHTML = css;
+  head.appendChild(style);
 }
 
 function getCurrentUser() {
@@ -182,7 +182,7 @@ function colorOwnPatients() {
     //background-color: lightgrey;
   }
   #A1_4_body > tr:hover > td {
-    // background-color: lightgrey !important;
+  // background-color: lightgrey !important;
   }
   `);
 
@@ -240,21 +240,21 @@ function patientListIdenticons() {
 
   addGlobalStyle(`
   .mategascript-identicon {
-      width: 60px;
-      height: 60px;
-      /*border: 1px solid black; */
-      padding: 0px;
-      margin: 0px;
-      display: block;
+    width: 60px;
+    height: 60px;
+    /*border: 1px solid black; */
+    padding: 0px;
+    margin: 0px;
+    display: block;
   }
   div.browser table.datal td.mategascript-patientname {
-      font-size: 1.5em;
-      /*font-weight: bold; */
-      padding: 0px;
-      display: flex;
-      justify-content: flex-start;
-      align-items: center;
-      gap: 1em;
+    font-size: 1.5em;
+    /*font-weight: bold; */
+    padding: 0px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 1em;
   }
   `);
 }
@@ -274,21 +274,21 @@ function uFrameIdenticons() {
   nameDiv.classList.add("mategascript-patientname");
   addGlobalStyle(`
   .mategascript-identicon {
-      width: 60px;
-      height: 60px;
-      /*border: 1px solid grey;*/
-      padding: 0px;
-      margin: 0px;
-      display: block;
+    width: 60px;
+    height: 60px;
+    /*border: 1px solid grey;*/
+    padding: 0px;
+    margin: 0px;
+    display: block;
   }
   .mategascript-patientname {
-      /*font-size: 1.5em;*/
-      /*font-weight: bold;*/
-      /*padding: 0px;*/
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 5px;
+    /*font-size: 1.5em;*/
+    /*font-weight: bold;*/
+    /*padding: 0px;*/
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
   }
   `);
 }
@@ -315,10 +315,8 @@ function autoTEK(label) {
   romai = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII', 'XIII', 'XIV', 'XV', 'XVI', 'XVII', 'XVIII', 'XIX', 'XX', 'XXI', 'XXII', 'XXIII'];
   extendNode = null;
   if("/sote/UpdateFrame.fl" != document.location.pathname) return;
-  console.log("autotek");
   var nodes = document.querySelectorAll("#report_table>tbody>tr>td:first-child");
   for(var i=0; i<nodes.length; i++) {
-    console.log("autoteklabel " + label);
     if(label == nodes[i].innerText) {
       var parent = nodes[i].parentNode;
       var tdnum = 3;
@@ -328,11 +326,8 @@ function autoTEK(label) {
       cim.classList.add("mategascript-address");
       var cimtext = cim.innerText;
       var cmatch = cimtext.match(cimre);
-      console.log(cimtext);
       if(!cmatch) continue;
-      //console.log(cmatch);
       var varos = cmatch[1] == "1"?("Budapest " + romai[parseInt(cmatch[2])-1] + ". kerület"):(cmatch[3]);
-      console.log(varos);
       var xtekrequest = {
         "url": "http://84.206.43.26:7080/ellatas/xtek/",
         "method": "GET",
@@ -345,10 +340,8 @@ function autoTEK(label) {
           //"Referer": "http://84.206.43.26:7080/ellatas/xtek/"
         }
       }
-      console.log("sending request: ", xtekrequest);
       var result = GM.xmlHttpRequest(xtekrequest);
 
-      console.log("request result: ", result);
       return;
     }
   }
@@ -356,23 +349,22 @@ function autoTEK(label) {
 }
 
 function xtekcb(e) {
-  console.log(e);
   if(e.context.stage == 0) {
     var url = new URL(new DOMParser().parseFromString(e.responseText, "text/html").querySelectorAll("form")[0].getAttribute("action"), "http://84.206.43.26:7080/ellatas/xtek/").href;
     GM.xmlHttpRequest(
-        {
-          "url": url,
-          "method": "POST",
-          "data": e.context.data,
-          "context": {"stage": 1, "cim": e.context.cim, "varos": e.context.varos},
-          "onload": xtekcb,
-          "onerror": autoTEKSequential,
-          "headers": {
-            "Content-Type": "application/x-www-form-urlencoded",
-            "Origin": "http://84.206.43.26:7080",
-            "Referer": "http://84.206.43.26:7080/ellatas/xtek/"
-          }
+      {
+        "url": url,
+        "method": "POST",
+        "data": e.context.data,
+        "context": {"stage": 1, "cim": e.context.cim, "varos": e.context.varos},
+        "onload": xtekcb,
+        "onerror": autoTEKSequential,
+        "headers": {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Origin": "http://84.206.43.26:7080",
+          "Referer": "http://84.206.43.26:7080/ellatas/xtek/"
         }
+      }
     );
   } else {
     var specnumre = /^(\d{4}) (.+)$/;
@@ -406,16 +398,13 @@ function xtekcb(e) {
         }
         hosps[prognum] = {hosp: hosp, spec: spectext};
       } catch(e) {
-        console.log(e, tdtexts);
       }
     }
-    //console.log(hosps);
     var filteredHosps = [];
     var specfilter = getUserPref("autoTEKSpecList");
     for(i=0; i<specfilter.length; i++) {
       filteredHosps.push(hosps[specfilter[i]]);
     }
-    //console.log(filteredHosps);
     var tekDropdown = document.createElement("table");
     tekDropdown.classList.add("mategascript-tekdropdown");
     var headRow = document.createElement("td");
@@ -437,37 +426,36 @@ function xtekcb(e) {
         console.log(e);
       }
     }
-    //console.log(tekDropdown);
     e.context.cim.appendChild(tekDropdown);
     e.context.cim.classList.add("mategascript-position-relative");
     addGlobalStyle(`
-table.mategascript-tekdropdown {
-  position: absolute;
-  visibility: hidden;
-  border: 1px solid black;
-  border-collapse: collapse;
-  background-color: white;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-  z-index: 1;
-}
-table.mategascript-tekdropdown td {
-  border: 1px solid black;
-  padding: revert;
-}
-table.mategascript-tekdropdown td.mategascript-address-row {
-  font-weight: bold;
-  text-align: center;
-}
-.mategascript-address:hover table.mategascript-tekdropdown {
-  visibility: visible;
-}
-.mategascript-position-relative {
-  position: relative;
-}
-table.mategascript-tekdropdown a[target="_blank"]::after {
-  content: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAQElEQVR42qXKwQkAIAxDUUdxtO6/RBQkQZvSi8I/pL4BoGw/XPkh4XigPmsUgh0626AjRsgxHTkUThsG2T/sIlzdTsp52kSS1wAAAABJRU5ErkJggg==);
-  margin: 0 3px 0 5px;
-}
+    table.mategascript-tekdropdown {
+      position: absolute;
+      visibility: hidden;
+      border: 1px solid black;
+      border-collapse: collapse;
+      background-color: white;
+      box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+      z-index: 1;
+    }
+    table.mategascript-tekdropdown td {
+      border: 1px solid black;
+      padding: revert;
+    }
+    table.mategascript-tekdropdown td.mategascript-address-row {
+      font-weight: bold;
+      text-align: center;
+    }
+    .mategascript-address:hover table.mategascript-tekdropdown {
+      visibility: visible;
+    }
+    .mategascript-position-relative {
+      position: relative;
+    }
+    table.mategascript-tekdropdown a[target="_blank"]::after {
+      content: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAQElEQVR42qXKwQkAIAxDUUdxtO6/RBQkQZvSi8I/pL4BoGw/XPkh4XigPmsUgh0626AjRsgxHTkUThsG2T/sIlzdTsp52kSS1wAAAABJRU5ErkJggg==);
+      margin: 0 3px 0 5px;
+    }
     `);
     autoTEKSequential();
   }
@@ -585,21 +573,21 @@ function loadList() {
     }
     var row = document.createElement("tr");
     var td = document.createElement("th");
-      td.innerText = "Név";
-      row.appendChild(td);
-      td = document.createElement("th");
-      td.innerText = "Folyamatban";
-      row.appendChild(td);
-      td = document.createElement("th");
-      td.innerText = "Triage";
-      row.appendChild(td);
-      /*td = document.createElement("td");
-      td.innerText = "Krit";
-      row.appendChild(td);
-      td = document.createElement("td");
-      td.innerText = "Kész";
-      row.appendChild(td);*/
-      droptable.appendChild(row);
+    td.innerText = "Név";
+    row.appendChild(td);
+    td = document.createElement("th");
+    td.innerText = "Folyamatban";
+    row.appendChild(td);
+    td = document.createElement("th");
+    td.innerText = "Triage";
+    row.appendChild(td);
+    /*td = document.createElement("td");
+     *      td.innerText = "Krit";
+     *      row.appendChild(td);
+     *      td = document.createElement("td");
+     *      td.innerText = "Kész";
+     *      row.appendChild(td);*/
+    droptable.appendChild(row);
     for(i = 0; i < docnames.length; i++) {
       var row = document.createElement("tr");
       var td = document.createElement("td");
@@ -612,20 +600,20 @@ function loadList() {
       td.innerText = pendingCounts[docnames[i]]["triage"] ? pendingCounts[docnames[i]]["triage"] : 0;
       row.appendChild(td);
       /*td = document.createElement("td");
-      td.innerText = pendingCounts[docnames[i]]["critical"];
-      row.appendChild(td);
-      td = document.createElement("td");
-      td.innerText = pendingCounts[docnames[i]]["done"];
-      row.appendChild(td);*/
+       *      td.innerText = pendingCounts[docnames[i]]["critical"];
+       *      row.appendChild(td);
+       *      td = document.createElement("td");
+       *      td.innerText = pendingCounts[docnames[i]]["done"];
+       *      row.appendChild(td);*/
       droptable.appendChild(row);
     }
     addGlobalStyle(`
-table.mategascript_droptable {
-  min-width: inherit;
-}
-table.mategascript_droptable th {
-  width: 33%;
-}
+    table.mategascript_droptable {
+      min-width: inherit;
+    }
+    table.mategascript_droptable th {
+      width: 33%;
+    }
     `);
   }
 
@@ -669,12 +657,10 @@ function checkUnfiltered() {
   for(var i = 0; i < unfilteredParams.length; i++) {
     try {
       var elem = document.getElementsByName(unfilteredParams[i][0])[0];
-      if(elem[unfilteredParams[i][1]] != unfilteredParams[i][2]) {
-        // console.log(elem, unfilteredParams[i]);
+      if(elem[unfilteredParams[i][1]] != unfilteredParams[i][2]) {ű
         return false;
       }
     } catch (e) {
-      console.log(e, unfilteredParams[i]);
     }
   }
   return true
@@ -688,7 +674,6 @@ function mategascript_reset_query() {
       var elem = document.getElementsByName(unfilteredParams[i][0])[0];
       elem[unfilteredParams[i][1]] = unfilteredParams[i][2];
     } catch (e) {
-      console.log(e, unfilteredParams[i]);
     }
   }
   doRefresh();
@@ -708,13 +693,13 @@ function triageButtonTame() {
     triageButton.classList.remove("blinking");
     new MutationObserver(triageButtonTameCallback).observe(triageButton, {attributes: true, attributeFilter: ["class"]});
     addGlobalStyle(`
-button.dropbtn.empty {
-  background-color: darkgreen;
-}
-button.dropbtn.blinking {
-  background-color: red;
-  animation: none !important;
-}
+    button.dropbtn.empty {
+      background-color: darkgreen;
+    }
+    button.dropbtn.blinking {
+      background-color: red;
+      animation: none !important;
+    }
     `);
   }
 }
@@ -779,16 +764,15 @@ function showSettingsButton() {
     settingsButton.setAttribute("onmousemove", "multilineTooltip.showTip(\"Medsol Plus beállítások\", event)");
     settingsButton.setAttribute("onmouseout", "multilineTooltip.hideTip(event)");
     holder.prepend(settingsButton);
-    //console.log(settingsButton);
     addGlobalStyle(`
-td.buttonsright {
-  width: 290px !important;
-}
-a.mategascript-settings-button {
-  background-image: url("https://emedsol1.sote.hu:9444/sote/style/s4/img/i_settings.png");
-  background-repeat: no-repeat;
-  background-position: center;
-}
+    td.buttonsright {
+      width: 290px !important;
+    }
+    a.mategascript-settings-button {
+      background-image: url("https://emedsol1.sote.hu:9444/sote/style/s4/img/i_settings.png");
+      background-repeat: no-repeat;
+      background-position: center;
+    }
 
     `);
   }
@@ -797,24 +781,24 @@ a.mategascript-settings-button {
 function openSettingsWindow() {
   settingsWindow = window.open("", "", "popup,width=600,height=600");
   settingsWindow.document.write(`
-<html>
+  <html>
   <head>
-    <title>
-      Medsol Plus beállítások
-    </title>
+  <title>
+  Medsol Plus beállítások
+  </title>
   </head>
   <body>
-    <h1>
-      Medsol Plus beállítások
-    </h1>
-    <div id="activateDiv">
-      A beállítások építés alatt, az alábbi gomb minden funkciót aktivál.<br />
-    </div>
-    <div id="settingsDiv">
-      A beállítások építés alatt, az alábbi gomb minden funkciót kikapcsol.<br />
-    </div>
+  <h1>
+  Medsol Plus beállítások
+  </h1>
+  <div id="activateDiv">
+  A beállítások építés alatt, az alábbi gomb minden funkciót aktivál.<br />
+  </div>
+  <div id="settingsDiv">
+  A beállítások építés alatt, az alábbi gomb minden funkciót kikapcsol.<br />
+  </div>
   </body>
-</html>
+  </html>
   `);
   var activateDiv = settingsWindow.document.getElementById("activateDiv");
   var settingsDiv = settingsWindow.document.getElementById("settingsDiv");
@@ -874,7 +858,6 @@ function patientAccounting() {
     } else {
       doctor = "";
     }
-    //console.log(evn);
     var patient = {};
     var patientState = {at: now, state: currentPage, doctor: doctor};
     if(!(evn in evnPatientList)) {
@@ -965,7 +948,6 @@ function patientAccounting() {
         mostRest = now - docs[docsKeys[i]].lastBegin;
       }
     }
-    //console.log(mostRested);
     docs[mostRested]["name"] = mostRested;
     orderedDocs.push(docs[mostRested]);
     delete docs[mostRested];
@@ -973,22 +955,21 @@ function patientAccounting() {
 
   var row = document.createElement("tr");
   var td = document.createElement("th");
-    td.innerText = "Név";
-    row.appendChild(td);
-    td = document.createElement("th");
-    td.innerText = "Folyamatban";
-    row.appendChild(td);
-    td = document.createElement("th");
-    td.innerText = "Triage";
-    row.appendChild(td);
-    td = document.createElement("th");
-    td.innerText = "Pihent";
-    row.appendChild(td);
-    /*td = document.createElement("td");
-    td.innerText = "Kész";
-    row.appendChild(td);*/
-    droptable.appendChild(row);
-  //console.log(orderedDocs);
+  td.innerText = "Név";
+  row.appendChild(td);
+  td = document.createElement("th");
+  td.innerText = "Folyamatban";
+  row.appendChild(td);
+  td = document.createElement("th");
+  td.innerText = "Triage";
+  row.appendChild(td);
+  td = document.createElement("th");
+  td.innerText = "Pihent";
+  row.appendChild(td);
+  /*td = document.createElement("td");
+   *    td.innerText = "Kész";
+   *    row.appendChild(td);*/
+  droptable.appendChild(row);
   for(i = 0; i < orderedDocs.length; i++) {
     if(orderedDocs[i].pending == 0 && orderedDocs[i].triage==0) continue;
     var row = document.createElement("tr");
@@ -1007,19 +988,19 @@ function patientAccounting() {
     td.innerText = pihent + "'";
     row.appendChild(td);
     /*
-    td = document.createElement("td");
-    td.innerText = pendingCounts[docnames[i]]["done"];
-    row.appendChild(td);*/
+     *    td = document.createElement("td");
+     *    td.innerText = pendingCounts[docnames[i]]["done"];
+     *    row.appendChild(td);*/
     droptable.appendChild(row);
   }
   addGlobalStyle(`
-table.mategascript_droptable {
-  min-width: inherit;
-}
-table.mategascript_droptable th {
-  width: 33%;
-}
-    `);
+  table.mategascript_droptable {
+    min-width: inherit;
+  }
+  table.mategascript_droptable th {
+    width: 33%;
+  }
+  `);
 
 }
 
@@ -1056,26 +1037,26 @@ function resetButton() {
         resetbtna.addEventListener("click", mategascript_reset_query);
         resetbtndiv.appendChild(resetbtna);
         addGlobalStyle(`
-          div.btn a.mategascript_reset_button {
-            margin: 0px;
-            padding: 0px 15px;
-            border: none;
-            background-color: red;
-            color: #ffffff;
-            height: 27px;
-            line-height: 27px;
-            text-align: left;
-            text-decoration: none;
-            white-space: nowrap;
-            vertical-align: text-middle;
-            float: left;
-            border-radius: 2px;
-            -webkit-transition: all 0.3s ease 0s;
-            -moz-transition: all 0.3s ease 0s;
-            -o-transition: all 0.3s ease 0s;
-            transition: all 0.3s ease 0s;
-            cursor: pointer;
-          }
+        div.btn a.mategascript_reset_button {
+          margin: 0px;
+          padding: 0px 15px;
+          border: none;
+          background-color: red;
+          color: #ffffff;
+          height: 27px;
+          line-height: 27px;
+          text-align: left;
+          text-decoration: none;
+          white-space: nowrap;
+          vertical-align: text-middle;
+          float: left;
+          border-radius: 2px;
+          -webkit-transition: all 0.3s ease 0s;
+          -moz-transition: all 0.3s ease 0s;
+          -o-transition: all 0.3s ease 0s;
+          transition: all 0.3s ease 0s;
+          cursor: pointer;
+        }
         `);
         submitbtns[i].before(resetbtndiv);
       }
@@ -1126,7 +1107,6 @@ function ptLoc() {
       var rows = document.querySelectorAll("#A1_4_body > tr");
       for(var i = 0; i < rows.length; i++) {
         var triagetext = rows[i].children[triagelabel].innerText;
-        // console.log(triagetext);
         var match = triagetext.match(locre);
         if(match) {
           rows[i].children[triagelabel].innerText = triagetext.replace(locre, " ");
@@ -1157,7 +1137,6 @@ inlineNoteEditStatus = {
 };
 
 function inlineNoteEdit() {
-  return false;
   if(["/sote/101315.do","/sote/101307.do"].includes(document.location.pathname)) {
     var triagelabel = -1;
     var headers = document.querySelectorAll("table.clabel th");
@@ -1181,25 +1160,25 @@ function inlineNoteEdit() {
       notetds[i].dataset.mategascriptOriginalText = notetds[i].dataset.mategascriptOriginalText || notetds[i].innerText;
     }
     addGlobalStyle(`
-td.mategascript-inline-edit {
-  cursor: text;
-  background-color: rgba(255,255,255,0);
-}
-td.mategascript-inline-edit.changed {
-  color: gray;
-}
-td.mategascript-inline-edit.success {
-  animation: flashgreen 2s linear 0s 1;
-}
-td.mategascript-invalid {
-  background-color: rgb(255,100,100) !important;
-}
-@keyframes flashgreen {
-  from {background-color: lightgreen;}
-  50% {background-color: lightgreen;}
-  to {}
-}
-                  `);
+    td.mategascript-inline-edit {
+      cursor: text;
+      background-color: rgba(255,255,255,0);
+    }
+    td.mategascript-inline-edit.changed {
+      color: gray;
+    }
+    td.mategascript-inline-edit.success {
+      animation: flashgreen 2s linear 0s 1;
+    }
+    td.mategascript-invalid {
+      background-color: rgb(255,100,100) !important;
+    }
+    @keyframes flashgreen {
+      from {background-color: lightgreen;}
+      50% {background-color: lightgreen;}
+      to {}
+    }
+    `);
     unsafeWindow.inlineNoteEditShim = inlineNoteEditShim;
     unsafeWindow.top.addEventListener("message", function(e) {
       if(e.data.message && e.data.message == "mategascript-note-success") {
@@ -1220,7 +1199,6 @@ td.mategascript-invalid {
       doRefresh = ((dro) => {
         return function(force) {
           if(force || !inlineNoteEditStatus.inhibitRefresh) return dro();
-          console.log("Refresh inhibited");
         };
       })(doRefresh);
     }
@@ -1262,7 +1240,7 @@ function inlineNoteEditKeypressHandler(e) {
     inlineNoteEditStatus.currentNode = e.target;
     var fmb = mainFuncLib.flatMode;
     mainFuncLib.flatMode = true;
-    var quickbuttons = e.target.parentNode.querySelectorAll("td>div>div");
+    var quickbuttons = e.target.parentNode.querySelectorAll("td>table>tbody>tr>td");
     for(var i = quickbuttons.length - 1; i >= 0; i--) {
       if(quickbuttons[i].getAttribute("onmouseover").includes("'Triage megjegyzés'")) {
         var origonclick = quickbuttons[i].getAttribute("onclick");
@@ -1285,7 +1263,6 @@ function inlineNoteEditKeypressHandler(e) {
 }
 
 function inlineNoteEditInputHandler(e) {
-  console.log(e.target.innerText);
   if(e.target.innerText.length > 200) {
     e.target.classList.add("mategascript-invalid");
   } else {
@@ -1294,8 +1271,6 @@ function inlineNoteEditInputHandler(e) {
 }
 
 function inlineNoteEditShim(width, height, handler, ...rest) {
-  console.log("inlineNoteEditShim called");
-  console.log(arguments);
   var r2c = rest[rest.length-1].slice();
   r2c[4] = width;
   r2c[5] = height;
@@ -1304,11 +1279,9 @@ function inlineNoteEditShim(width, height, handler, ...rest) {
 }
 
 function inlineNoteEditMutationObserver(cbn, td, recs, obs) {
-  console.log(cbn);
   for(var i = 0; i < recs.length; i++) {
     for(var j = 0; j < recs[i].addedNodes.length; j++) {
       var curNode = recs[i].addedNodes[j];
-      console.log(curNode);
       if(curNode.tagName != "IFRAME") continue;
       if(curNode.getAttribute("style").includes("opacity: 0.62")) {
         curNode.setAttribute("style", "display: none;");
@@ -1345,7 +1318,6 @@ function patientInNewWindow() {
 
 function patientInNewWindowClickHandler(event, ...rest) {
   if(event.ctrlKey) {
-    console.log(event);
     var r3c = rest[3].slice();
     r3c[2] = "new";
     r3c[4] = "1024";
@@ -1364,7 +1336,6 @@ if(getUserPref("patientInNewWindow")) {
 function popupsAreTabs() {
   unsafeWindow.open = function(open) {
     return function() {
-      console.log(arguments);
       return open(...Array.prototype.slice.call(arguments, 0, 2));
     }
   }(unsafeWindow.open);
