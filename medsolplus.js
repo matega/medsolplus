@@ -7,7 +7,7 @@
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @grant       GM.xmlHttpRequest
-// @version     1.25
+// @version     1.26
 // @downloadURL https://raw.githubusercontent.com/matega/medsolplus/master/medsolplus.js
 // @author      Dr. Galambos Máté | galambos.mate@semmelweis.hu
 // @description e-MedSolution extra funkciók a sürgősségi osztályon (KSBA)
@@ -35,7 +35,7 @@ settingsSkeleton = {
   "hideevn": false,
   "triageName": "",
   "patientAccounting": false,
-  "inlineNoteEdit": true,
+  "inlineNoteEdit": false,
   "popupsAreTabs": false,
   "patientInNewWindow": true,
   "resetButton": true
