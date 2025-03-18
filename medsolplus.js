@@ -4,10 +4,11 @@
 // @match       https://emedsol1.sote.hu:9444/sote/*
 // @match       https://emedsol2.sote.hu:9444/sote/*
 // @match       https://emedsol3.sote.hu:9444/sote/*
+// @match       https://emedsol4.sote.hu:9444/sote/*
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @grant       GM.xmlHttpRequest
-// @version     1.26
+// @version     1.28
 // @downloadURL https://raw.githubusercontent.com/matega/medsolplus/master/medsolplus.js
 // @author      Dr. Galambos Máté | galambos.mate@semmelweis.hu
 // @description e-MedSolution extra funkciók a sürgősségi osztályon (KSBA)
@@ -38,7 +39,8 @@ settingsSkeleton = {
   "inlineNoteEdit": false,
   "popupsAreTabs": false,
   "patientInNewWindow": true,
-  "resetButton": true
+  "resetButton": true,
+  "inlineNoteEditNG": false
 }
 
 intMedAssign = {
@@ -653,16 +655,20 @@ function getUnfilteredParameters() {
 }
 
 function checkUnfiltered() {
+  console.log("unfilteredParams running")
   var unfilteredParams = getUnfilteredParameters();
   for(var i = 0; i < unfilteredParams.length; i++) {
     try {
       var elem = document.getElementsByName(unfilteredParams[i][0])[0];
-      if(elem[unfilteredParams[i][1]] != unfilteredParams[i][2]) {ű
+      console.log("Checking " + unfilteredParams[i][1] + " of", elem, " to equal " + unfilteredParams[i][2]);
+      if(elem[unfilteredParams[i][1]] != unfilteredParams[i][2]) {
         return false;
       }
     } catch (e) {
+      console.log(e);
     }
   }
+  console.log("Returning true");
   return true
 }
 
@@ -725,6 +731,7 @@ if(getUserPref("triageButtonTame")) triageButtonTame();
 function hideEvn() {
   if(["/sote/101315.do","/sote/101307.do"].includes(document.location.pathname)) {
     var headerTable = document.querySelector("div#A1_3 > table");
+    if(!headerTable) return;
     var headerCells = headerTable.querySelectorAll("th");
     var evnCol = -1;
     for(var i=0; i<headerCells.length; i++) {
@@ -1293,6 +1300,29 @@ function inlineNoteEditMutationObserver(cbn, td, recs, obs) {
         curNode.dataset.mategascriptFrameName = cbn.framename;
         curNode.dataset.mategascriptCallbackNumber = cbn.callbacknumber;
         curNode.setAttribute("style", "display: none;");
+        console.log(curNode)
+      }
+    }
+  }
+}
+
+
+function inlineNoteEditMutationObserverNG(cbn, td, recs, obs) {
+  for(var i = 0; i < recs.length; i++) {
+    for(var j = 0; j < recs[i].addedNodes.length; j++) {
+      var curNode = recs[i].addedNodes[j];
+      if(curNode.tagName != "IFRAME") continue;
+      if(curNode.getAttribute("style").includes("opacity: 0.62")) {
+        //curNode.setAttribute("style", "display: none;");
+        continue;
+      }
+      if(curNode.getAttribute("desiredheight") == cbn.callbacknumber) {
+        obs.disconnect();
+        curNode.dataset.mategascriptNewTriageNote = td.innerText;
+        curNode.dataset.mategascriptFrameName = cbn.framename;
+        curNode.dataset.mategascriptCallbackNumber = cbn.callbacknumber;
+        //curNode.setAttribute("style", "display: none;");
+        console.log(curNode)
       }
     }
   }
@@ -1300,6 +1330,89 @@ function inlineNoteEditMutationObserver(cbn, td, recs, obs) {
 
 if(getUserPref("inlineNoteEdit")) {
   inlineNoteEdit();
+}
+
+function inlineNoteEditNG() {
+  if(["/sote/101315.do","/sote/101307.do"].includes(document.location.pathname)) {
+    console.log("inlineNoteEditNG");
+    unsafeWindow.inlineNoteEditShim = inlineNoteEditShim;
+    let triagelabel = -1;
+    const headers = document.querySelectorAll("table.clabel th");
+    for(var i = 0; i<headers.length; i++) {
+      if(headers[i].innerHTML == "Triage megjegyzés") {
+        triagelabel = i;
+        break;
+      }
+    }
+    if(triagelabel == -1) return;
+    const notetds = document.querySelectorAll("#A1_4_body>tr>td:nth-child("+(triagelabel+1)+")");
+    for(var i=0; i<notetds.length; i++) {
+      notetds[i].setAttribute("onClick", "");
+      notetds[i].contentEditable = "true";
+      notetds[i].spellcheck = false;
+      notetds[i].classList.add("mategascript-inline-edit");
+      notetds[i].dataset.mategascriptOriginalText = notetds[i].dataset.mategascriptOriginalText || notetds[i].innerText;
+      notetds[i].addEventListener("click", (e) => {
+        const quickbuttons = e.target.parentNode.querySelectorAll("td>table>tbody>tr>td");
+        for(var i = quickbuttons.length - 1; i >= 0; i--) {
+          if(quickbuttons[i].getAttribute("onmouseover").includes("Triage megjegyzés")) {
+            const origonclick = quickbuttons[i].getAttribute("onclick");
+            const callbacknumber = ""+(1000000 + Math.floor(e.timeStamp % 1000000));
+            e.target.setAttribute("id", "mategascript-inlinetd-" + callbacknumber);
+            const newonclick = origonclick.replace(/javascript:(doAH1(?:_AcAuth)?)\(/, "inlineNoteEditShim(\"0\",\"" +callbacknumber+ "\",$1,");
+            var mo = new MutationObserver(function(cbn, td){return function(recs, obs){inlineNoteEditMutationObserverNG(cbn, td, recs, obs)}}({callbacknumber: callbacknumber, framename: name}, e.target));
+            mo.observe(window.top.document, {subtree: true, childList: true});
+            const fmb = mainFuncLib.flatMode;
+            mainFuncLib.flatMode = true;
+            unsafeWindow.eval(newonclick);
+            mainFuncLib.flatMode = fmb;
+            break;
+          }
+        }
+      });
+    }
+    addGlobalStyle(`
+    td.mategascript-inline-edit {
+      cursor: text;
+      background-color: rgba(255,255,255,0);
+    }
+    td.mategascript-inline-edit.changed {
+      color: gray;
+    }
+    td.mategascript-inline-edit.success {
+      animation: flashgreen 2s linear 0s 1;
+    }
+    td.mategascript-invalid {
+      background-color: rgb(255,100,100) !important;
+    }
+    @keyframes flashgreen {
+      from {background-color: lightgreen;}
+      50% {background-color: lightgreen;}
+      to {}
+    }
+    `);
+  }
+  else if(document.location.pathname == "/sote/UpdateFrame.fl") {
+    var frameelement = window.parent.frameElement;
+    if(!frameelement || !frameelement.dataset.mategascriptNewTriageNote) return;
+    console.log(document);
+    for(name of ["U.DUMMY.22", "U.DUMMY.24", "U.DUMMY.20", "U.DUMMY.21"]) {
+      console.log(document.getElementsByName(name)[0].value);
+    }
+    return;
+    var text = frameelement.dataset.mategascriptNewTriageNote
+    inputelement.value = text;
+    init();
+    var cbn = frameelement.dataset.mategascriptCallbackNumber;
+    top.funcLib.doInvokeOpenerAtClose = function(cbn, text){return function(){
+      window.top.postMessage({message: "mategascript-note-ng-success", callbacknumber: cbn, text: text});
+    }}(cbn, text);
+    doOK();
+  }
+}
+
+if(getUserPref("inlineNoteEditNG")) {
+  inlineNoteEditNG();
 }
 
 function patientInNewWindow() {
