@@ -8,7 +8,7 @@
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @grant       GM.xmlHttpRequest
-// @version     1.28
+// @version     1.29
 // @downloadURL https://raw.githubusercontent.com/matega/medsolplus/master/medsolplus.js
 // @author      Dr. Galambos Máté | galambos.mate@semmelweis.hu
 // @description e-MedSolution extra funkciók a sürgősségi osztályon (KSBA)
@@ -507,7 +507,7 @@ if(getUserPref("autoAge")) autoAge();
 
 function loadList() {
   if(["/sote/101315.do","/sote/101307.do"].includes(document.location.pathname)) {
-    var userre = new RegExp("^(?:COVID\\W+)?((?!COVID)[A-ZÁÉÍÓÖŐÚÜŰ\\.\\-]{2,}|VaPe)(?:\\W|$)");
+    var userre = new RegExp("^(?:(?:COVID|<(?:[5-9]|1[0-3]|JARO)>)\\W+)*((?!COVID)[A-ZÁÉÍÓÖŐÚÜŰ\\.\\-]{2,}|VaPe)(?:\\W|$)");
     var donere = /(?:>>|\W-{2,}>>?)/;
     var attnre = /!!/;
 
@@ -526,6 +526,7 @@ function loadList() {
     var doctors = {};
     for(var i=0; i<notes.length; i++) {
       var notelabel = htmlDecode(notes[i].innerHTML);
+      console.log(notelabel);
       var result = userre.exec(notelabel);
       if(result) {
         var doctor = user_map(result[1]);
@@ -655,12 +656,12 @@ function getUnfilteredParameters() {
 }
 
 function checkUnfiltered() {
-  console.log("unfilteredParams running")
+  //console.log("unfilteredParams running")
   var unfilteredParams = getUnfilteredParameters();
   for(var i = 0; i < unfilteredParams.length; i++) {
     try {
       var elem = document.getElementsByName(unfilteredParams[i][0])[0];
-      console.log("Checking " + unfilteredParams[i][1] + " of", elem, " to equal " + unfilteredParams[i][2]);
+      //console.log("Checking " + unfilteredParams[i][1] + " of", elem, " to equal " + unfilteredParams[i][2]);
       if(elem[unfilteredParams[i][1]] != unfilteredParams[i][2]) {
         return false;
       }
@@ -668,7 +669,7 @@ function checkUnfiltered() {
       console.log(e);
     }
   }
-  console.log("Returning true");
+  //console.log("Returning true");
   return true
 }
 
@@ -842,7 +843,7 @@ function resetUser(e) {
 function patientAccounting() {
   if(!(["/sote/101315.do","/sote/101307.do"].includes(document.location.pathname))) return;
   if(!checkUnfiltered()) return;
-  var userre = new RegExp("^(?:COVID\\W+)?((?!COVID)[A-ZÁÉÍÓÖŐÚÜŰ\\.\\-]{2,}|VaPe)(?:\\W|$)");
+  var userre = new RegExp("^(?:(?:COVID|<(?:[5-9]|1[0-3]|JARO)>)\\W+)*((?!COVID)[A-ZÁÉÍÓÖŐÚÜŰ\\.\\-]{2,}|VaPe)(?:\\W|$)");
   var currentPage = (document.location.pathname == "/sote/101307.do") ? "triage" : "pending";
   var now = Date.now();
   var evnPatientList = GM_getValue("evnPatientList", {});
@@ -858,7 +859,8 @@ function patientAccounting() {
   var notes = document.querySelectorAll("#A1_4_body > tr> td:nth-child("+ (triagelabel+1) +")");
   for(var i =  0 ; i<notes.length; i++) {
     var evn = notes[i].parentNode.dataset.mategascriptEvn;
-    var notelabel = notes[i].innerHTML;
+    var notelabel = htmlDecode(notes[i].innerHTML);
+    console.log(notelabel);
     var result = userre.exec(notelabel);
     if(result) {
       var doctor = user_map(result[1]);
