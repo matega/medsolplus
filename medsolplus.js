@@ -8,7 +8,7 @@
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @grant       GM.xmlHttpRequest
-// @version     1.29
+// @version     1.30
 // @downloadURL https://raw.githubusercontent.com/matega/medsolplus/master/medsolplus.js
 // @author      Dr. Galambos Máté | galambos.mate@semmelweis.hu
 // @description e-MedSolution extra funkciók a sürgősségi osztályon (KSBA)
@@ -507,7 +507,7 @@ if(getUserPref("autoAge")) autoAge();
 
 function loadList() {
   if(["/sote/101315.do","/sote/101307.do"].includes(document.location.pathname)) {
-    var userre = new RegExp("^(?:(?:COVID|<(?:[5-9]|1[0-3]|JARO)>)\\W+)*((?!COVID)[A-ZÁÉÍÓÖŐÚÜŰ\\.\\-]{2,}|VaPe)(?:\\W|$)");
+    var userre = new RegExp("^(?:(?:COVID|<(?:[5-9]|1[0-3]|JARO|VARO)>)\\W+)*((?!COVID)[A-ZÁÉÍÓÖŐÚÜŰ\\.\\-]{2,}|VaPe)(?:\\W|$)");
     var donere = /(?:>>|\W-{2,}>>?)/;
     var attnre = /!!/;
 
@@ -843,7 +843,7 @@ function resetUser(e) {
 function patientAccounting() {
   if(!(["/sote/101315.do","/sote/101307.do"].includes(document.location.pathname))) return;
   if(!checkUnfiltered()) return;
-  var userre = new RegExp("^(?:(?:COVID|<(?:[5-9]|1[0-3]|JARO)>)\\W+)*((?!COVID)[A-ZÁÉÍÓÖŐÚÜŰ\\.\\-]{2,}|VaPe)(?:\\W|$)");
+  var userre = new RegExp("^(?:(?:COVID|<(?:[5-9]|1[0-3]|JARO|VARO)>)\\W+)*((?!COVID)[A-ZÁÉÍÓÖŐÚÜŰ\\.\\-]{2,}|VaPe)(?:\\W|$)");
   var currentPage = (document.location.pathname == "/sote/101307.do") ? "triage" : "pending";
   var now = Date.now();
   var evnPatientList = GM_getValue("evnPatientList", {});
